@@ -592,17 +592,137 @@ export const translations = {
     edit: 'ترمیم',
     search: 'تلاش کریں',
     noResults: 'کوئی نتیجہ نہیں ملا'
+  },
+
+  zh: {
+    // App
+    appName: 'NH GOODS',
+    companyName: 'Vision & Faith',
+    tagline: 'الرؤية والإيمان',
+    
+    // Auth
+    login: '登录',
+    phoneNumber: '电话号码',
+    pin: '密码',
+    enterPhone: '请输入您的电话号码',
+    enterPin: '请输入您的密码',
+    loginButton: '登录',
+    invalidCredentials: '电话号码或密码无效',
+    logout: '退出登录',
+    
+    // Navigation
+    home: '首页',
+    catalog: '产品目录',
+    cart: '购物车',
+    orders: '订单',
+    profile: '个人资料',
+    admin: '管理',
+    
+    // Categories
+    bakery: '烘焙',
+    cakesSweets: '蛋糕和甜点',
+    premiumSnacks: '优质零食',
+    energyBeverages: '能量饮料',
+    allCategories: '所有分类',
+    
+    // Products
+    products: '产品',
+    addToCart: '加入购物车',
+    wholesalePrice: '批发价',
+    retailPrice: '零售价',
+    inStock: '有库存',
+    outOfStock: '缺货',
+    quantity: '数量',
+    
+    // Cart
+    yourCart: '您的购物车',
+    cartEmpty: '购物车为空',
+    total: '总计',
+    subtotal: '小计',
+    checkout: '结账',
+    placeOrder: '下单',
+    orderNotes: '订单备注（可选）',
+    removeItem: '删除',
+    
+    // Orders
+    yourOrders: '您的订单',
+    orderHistory: '订单历史',
+    orderDetails: '订单详情',
+    orderNumber: '订单号',
+    orderDate: '订单日期',
+    orderStatus: '状态',
+    noOrders: '暂无订单',
+    pending: '待处理',
+    confirmed: '已确认',
+    delivering: '配送中',
+    delivered: '已送达',
+    cancelled: '已取消',
+    
+    // Voice Order
+    voiceOrder: '语音下单',
+    recordOrder: '录制订单',
+    stopRecording: '停止录制',
+    submitVoiceOrder: '提交语音订单',
+    voiceOrderSuccess: '语音订单提交成功',
+    
+    // Invoices
+    invoices: '发票',
+    digitalInvoiceVault: '电子发票库',
+    downloadInvoice: '下载发票',
+    noInvoices: '暂无发票',
+    
+    // Profile
+    myProfile: '我的资料',
+    shopName: '店铺名称',
+    shopAddress: '店铺地址',
+    language: '语言',
+    saveChanges: '保存更改',
+    
+    // Badges
+    freeDelivery: '免费配送',
+    noMinimum: '无最低订单',
+    
+    // Admin
+    adminPanel: '管理面板',
+    manageUsers: '用户管理',
+    manageProducts: '产品管理',
+    viewOrders: '查看订单',
+    activityLog: '活动日志',
+    voiceOrders: '语音订单',
+    addUser: '添加用户',
+    addProduct: '添加产品',
+    customerPresence: '客户位置',
+    atShop: '在店',
+    away: '离开',
+    navigate: '导航',
+    
+    // WhatsApp
+    contactWhatsApp: '通过WhatsApp联系',
+    directLine: '直接联系',
+    
+    // Misc
+    welcome: '欢迎',
+    loading: '加载中...',
+    error: '错误',
+    success: '成功',
+    cancel: '取消',
+    save: '保存',
+    delete: '删除',
+    edit: '编辑',
+    search: '搜索',
+    noResults: '未找到结果'
   }
 };
 
-export type Language = 'en' | 'es' | 'hi' | 'ne' | 'ur';
+export type Language = 'en' | 'es' | 'hi' | 'ne' | 'ur' | 'zh';
 
 export const languageNames: Record<Language, string> = {
   en: 'English',
   es: 'Español',
   hi: 'हिन्दी',
   ne: 'नेपाली',
-  ur: 'اردو'
+  ur: 'اردو',
+  zh: '中文'
 };
 
 export const isRTL = (lang: Language): boolean => {
