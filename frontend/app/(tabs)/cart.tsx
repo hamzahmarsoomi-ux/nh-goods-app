@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Pressable,
-  TextInput,
-  Alert,
-  ActivityIndicator
+  View, Text, StyleSheet, FlatList, Pressable, TextInput,
+  Alert, ActivityIndicator, Modal, ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -17,355 +11,288 @@ import { useTranslation } from '../../src/hooks/useTranslation';
 import { useCartStore } from '../../src/store/cartStore';
 import { createOrder } from '../../src/utils/api';
 
+const PAYMENT_METHODS = [
+  { id: 'bank_check', label: 'Bank Check', labelAr: 'شيك بنكي', icon: 'document-text-outline' },
+  { id: 'bank_transfer', label: 'Bank Transfer', labelAr: 'تحويل بنكي', icon: 'swap-horizontal-outline' }
+];
+
 export default function CartScreen() {
   const { t, rtl } = useTranslation();
   const router = useRouter();
   const { items, updateQuantity, removeItem, getTotal, clearCart } = useCartStore();
-  
+
   const [notes, setNotes] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
   const [isOrdering, setIsOrdering] = useState(false);
-  
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [lastOrderTotal, setLastOrderTotal] = useState(0);
+  const [lastOrderId, setLastOrderId] = useState('');
+
   const handlePlaceOrder = async () => {
-    if (items.length === 0) {
-      Alert.alert('Error', 'Your cart is empty');
-      return;
-    }
-    
+    if (items.length === 0) return;
+
     setIsOrdering(true);
     try {
       const orderItems = items.map(item => ({
-        product_id: item.product_id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity
+        product_id: item.product_id, name: item.name,
+        price: item.price, quantity: item.quantity
       }));
-      
-      await createOrder({
+
+      const res = await createOrder({
         items: orderItems,
-        notes: notes || undefined
+        notes: notes || undefined,
+        payment_method: paymentMethod
       });
-      
+
+      setLastOrderTotal(getTotal());
+      setLastOrderId(res.data?.id?.slice(-8)?.toUpperCase() || '');
       clearCart();
-      Alert.alert(
-        t('success'),
-        'Your order has been placed successfully!',
-        [{ text: 'OK', onPress: () => router.push('/orders') }]
-      );
+      setShowSuccess(true);
     } catch (error) {
-      console.error('Error placing order:', error);
       Alert.alert(t('error'), 'Failed to place order. Please try again.');
     } finally {
       setIsOrdering(false);
     }
   };
-  
+
+  const total = getTotal();
+
   const renderCartItem = ({ item }: { item: any }) => (
-    <View style={styles.cartItem}>
-      <View style={styles.itemImagePlaceholder}>
-        <Ionicons name="cube-outline" size={30} color={COLORS.textMuted} />
+    <View style={s.cartItem}>
+      <View style={s.itemIcon}>
+        <Ionicons name="cube-outline" size={24} color={COLORS.textMuted} />
       </View>
-      
-      <View style={styles.itemInfo}>
-        <Text style={[styles.itemName, rtl && styles.rtlText]} numberOfLines={2}>
-          {item.name}
-        </Text>
-        <Text style={styles.itemPrice}>${item.price.toFixed(2)} each</Text>
+      <View style={s.itemInfo}>
+        <Text style={[s.itemName, rtl && s.rtl]} numberOfLines={2}>{item.name}</Text>
+        <Text style={s.itemPrice}>${item.price.toFixed(2)} each</Text>
       </View>
-      
-      <View style={styles.quantityContainer}>
-        <Pressable
-          style={styles.quantityButton}
-          onPress={() => updateQuantity(item.product_id, item.quantity - 1)}
-        >
-          <Ionicons name="remove" size={18} color={COLORS.textPrimary} />
+      <View style={s.qtyContainer}>
+        <Pressable testID={`qty-minus-${item.product_id}`} style={s.qtyBtn} onPress={() => updateQuantity(item.product_id, item.quantity - 1)}>
+          <Ionicons name="remove" size={16} color={COLORS.textPrimary} />
         </Pressable>
-        <Text style={styles.quantityText}>{item.quantity}</Text>
-        <Pressable
-          style={styles.quantityButton}
-          onPress={() => updateQuantity(item.product_id, item.quantity + 1)}
-        >
-          <Ionicons name="add" size={18} color={COLORS.textPrimary} />
+        <Text style={s.qtyText}>{item.quantity}</Text>
+        <Pressable testID={`qty-plus-${item.product_id}`} style={s.qtyBtn} onPress={() => updateQuantity(item.product_id, item.quantity + 1)}>
+          <Ionicons name="add" size={16} color={COLORS.textPrimary} />
         </Pressable>
       </View>
-      
-      <View style={styles.itemTotal}>
-        <Text style={styles.itemTotalPrice}>
-          ${(item.price * item.quantity).toFixed(2)}
-        </Text>
-        <Pressable
-          style={styles.removeButton}
-          onPress={() => removeItem(item.product_id)}
-        >
-          <Ionicons name="trash-outline" size={18} color={COLORS.error} />
+      <View style={s.itemTotalCol}>
+        <Text style={s.itemTotal}>${(item.price * item.quantity).toFixed(2)}</Text>
+        <Pressable testID={`remove-${item.product_id}`} style={s.removeBtn} onPress={() => removeItem(item.product_id)}>
+          <Ionicons name="trash-outline" size={16} color={COLORS.error} />
         </Pressable>
       </View>
     </View>
   );
-  
-  const total = getTotal();
-  
+
+  // Success Confirmation Screen
+  if (showSuccess) {
+    return (
+      <SafeAreaView style={s.container}>
+        <View style={s.successScreen}>
+          <View style={s.successIcon}>
+            <Ionicons name="checkmark-circle" size={80} color={COLORS.success} />
+          </View>
+          <Text style={s.successTitle}>Thank you for your order!</Text>
+          <Text style={s.successSubtitle}>
+            Your invoice has been generated and saved to your Invoice Vault.
+          </Text>
+          <View style={s.successCard}>
+            <Text style={s.successLabel}>Order #{lastOrderId}</Text>
+            <Text style={s.successTotal}>${lastOrderTotal.toFixed(2)}</Text>
+            <Text style={s.successPayment}>
+              Payment: {paymentMethod === 'bank_check' ? 'Bank Check (شيك بنكي)' : 'Bank Transfer (تحويل بنكي)'}
+            </Text>
+          </View>
+          <Text style={s.successMessage}>
+            We will process your delivery from our Hooksett warehouse shortly.
+          </Text>
+          <View style={s.successCompany}>
+            <Text style={s.successCompanyName}>NH QUALITY GOODS LLC</Text>
+            <Text style={s.successCompanyTag}>Vision & Faith | الرؤية والإيمان</Text>
+          </View>
+          <Pressable testID="success-home-btn" style={s.successBtn} onPress={() => { setShowSuccess(false); router.push('/orders'); }}>
+            <Text style={s.successBtnText}>View Orders</Text>
+          </Pressable>
+          <Pressable style={s.successBtnSec} onPress={() => { setShowSuccess(false); router.push('/catalog'); }}>
+            <Text style={s.successBtnSecText}>Continue Shopping</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('yourCart')}</Text>
-        <Text style={styles.headerSubtitle}>NH QUALITY GOODS LLC</Text>
+      <View style={s.header}>
+        <Text style={s.headerTitle}>{t('yourCart')}</Text>
+        <Text style={s.headerSub}>NH QUALITY GOODS LLC</Text>
       </View>
-      
+
       {items.length === 0 ? (
-        <View style={styles.emptyContainer}>
+        <View style={s.emptyContainer}>
           <Ionicons name="cart-outline" size={80} color={COLORS.textMuted} />
-          <Text style={styles.emptyText}>{t('cartEmpty')}</Text>
-          <Pressable
-            style={styles.shopButton}
-            onPress={() => router.push('/catalog')}
-          >
-            <Text style={styles.shopButtonText}>Browse Catalog</Text>
+          <Text style={s.emptyText}>{t('cartEmpty')}</Text>
+          <Pressable testID="browse-btn" style={s.browseBtn} onPress={() => router.push('/catalog')}>
+            <Text style={s.browseBtnText}>Browse Catalog</Text>
           </Pressable>
         </View>
       ) : (
-        <>
-          <FlatList
-            data={items}
-            keyExtractor={(item) => item.product_id}
-            renderItem={renderCartItem}
-            contentContainerStyle={styles.cartList}
-            showsVerticalScrollIndicator={false}
-          />
-          
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Cart Items */}
+          {items.map((item) => (
+            <View key={item.product_id} style={{ paddingHorizontal: SPACING.xl }}>
+              {renderCartItem({ item })}
+            </View>
+          ))}
+
           {/* Notes */}
-          <View style={styles.notesContainer}>
-            <Text style={styles.notesLabel}>{t('orderNotes')}</Text>
+          <View style={s.sectionPad}>
+            <Text style={s.sectionLabel}>{t('orderNotes')}</Text>
             <TextInput
-              style={[styles.notesInput, rtl && styles.rtlText]}
+              style={[s.notesInput, rtl && s.rtl]}
               placeholder="Add any special instructions..."
               placeholderTextColor={COLORS.textMuted}
-              value={notes}
-              onChangeText={setNotes}
-              multiline
-              numberOfLines={3}
+              value={notes} onChangeText={setNotes}
+              multiline numberOfLines={2}
             />
           </View>
-          
+
+          {/* Payment Method */}
+          <View style={s.sectionPad}>
+            <Text style={s.sectionLabel}>Payment Method</Text>
+            {PAYMENT_METHODS.map((pm) => (
+              <Pressable
+                key={pm.id}
+                testID={`payment-${pm.id}`}
+                style={[s.paymentOption, paymentMethod === pm.id && s.paymentOptionActive]}
+                onPress={() => setPaymentMethod(pm.id)}
+              >
+                <View style={[s.paymentRadio, paymentMethod === pm.id && s.paymentRadioActive]}>
+                  {paymentMethod === pm.id && <View style={s.paymentRadioDot} />}
+                </View>
+                <Ionicons name={pm.icon as any} size={22} color={paymentMethod === pm.id ? COLORS.royalGold : COLORS.textMuted} />
+                <View style={s.paymentTextCol}>
+                  <Text style={[s.paymentLabel, paymentMethod === pm.id && s.paymentLabelActive]}>{pm.label}</Text>
+                  <Text style={s.paymentLabelAr}>{pm.labelAr}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+
           {/* Summary */}
-          <View style={styles.summaryContainer}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{t('subtotal')}</Text>
-              <Text style={styles.summaryValue}>${total.toFixed(2)}</Text>
+          <View style={s.summary}>
+            <View style={s.summaryRow}>
+              <Text style={s.summaryLabel}>{t('subtotal')}</Text>
+              <Text style={s.summaryValue}>${total.toFixed(2)}</Text>
             </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Delivery</Text>
-              <Text style={[styles.summaryValue, styles.freeText]}>FREE</Text>
+            <View style={s.summaryRow}>
+              <Text style={s.summaryLabel}>Delivery</Text>
+              <Text style={[s.summaryValue, s.freeText]}>FREE</Text>
             </View>
-            <View style={styles.divider} />
-            <View style={styles.summaryRow}>
-              <Text style={styles.totalLabel}>{t('total')}</Text>
-              <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
+            <View style={s.divider} />
+            <View style={s.summaryRow}>
+              <Text style={s.totalLabel}>Grand Total</Text>
+              <Text style={s.totalValue}>${total.toFixed(2)}</Text>
             </View>
-            
+
             <Pressable
-              style={[styles.checkoutButton, isOrdering && styles.checkoutButtonDisabled]}
-              onPress={handlePlaceOrder}
-              disabled={isOrdering}
+              testID="place-order-btn"
+              style={[s.checkoutBtn, isOrdering && s.checkoutBtnDisabled]}
+              onPress={handlePlaceOrder} disabled={isOrdering}
             >
-              {isOrdering ? (
-                <ActivityIndicator color={COLORS.deepNavy} />
-              ) : (
+              {isOrdering ? <ActivityIndicator color={COLORS.deepNavy} /> : (
                 <>
-                  <Ionicons name="checkmark-circle" size={20} color={COLORS.deepNavy} />
-                  <Text style={styles.checkoutButtonText}>{t('placeOrder')}</Text>
+                  <Ionicons name="checkmark-circle" size={22} color={COLORS.deepNavy} />
+                  <Text style={s.checkoutBtnText}>{t('placeOrder')} | أدفع</Text>
                 </>
               )}
             </Pressable>
           </View>
-        </>
+        </ScrollView>
       )}
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background
-  },
-  header: {
-    paddingHorizontal: SPACING.xl,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.lg
-  },
-  headerTitle: {
-    fontSize: FONTS.sizes.xxl,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary
-  },
-  headerSubtitle: {
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.royalGold,
-    marginTop: 2
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: SPACING.xl
-  },
-  emptyText: {
-    color: COLORS.textMuted,
-    fontSize: FONTS.sizes.lg,
-    marginTop: SPACING.lg,
-    marginBottom: SPACING.xl
-  },
-  shopButton: {
-    backgroundColor: COLORS.royalGold,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xxl,
-    borderRadius: BORDER_RADIUS.md
-  },
-  shopButtonText: {
-    color: COLORS.deepNavy,
-    fontSize: FONTS.sizes.md,
-    fontWeight: 'bold'
-  },
-  cartList: {
-    paddingHorizontal: SPACING.xl
-  },
+const s = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background },
+  header: { paddingHorizontal: SPACING.xl, paddingTop: SPACING.md, paddingBottom: SPACING.lg },
+  headerTitle: { fontSize: FONTS.sizes.xxl, fontWeight: 'bold', color: COLORS.textPrimary },
+  headerSub: { fontSize: FONTS.sizes.xs, color: COLORS.royalGold, marginTop: 2 },
+  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: SPACING.xl },
+  emptyText: { color: COLORS.textMuted, fontSize: FONTS.sizes.lg, marginTop: SPACING.lg, marginBottom: SPACING.xl },
+  browseBtn: { backgroundColor: COLORS.royalGold, paddingVertical: SPACING.md, paddingHorizontal: SPACING.xxl, borderRadius: BORDER_RADIUS.md },
+  browseBtnText: { color: COLORS.deepNavy, fontSize: FONTS.sizes.md, fontWeight: 'bold' },
   cartItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.cardBackground,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-    ...SHADOWS.small
+    flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.cardBackground,
+    borderRadius: BORDER_RADIUS.md, padding: SPACING.md, marginBottom: SPACING.sm, ...SHADOWS.small
   },
-  itemImagePlaceholder: {
-    width: 60,
-    height: 60,
-    backgroundColor: COLORS.inputBackground,
-    borderRadius: BORDER_RADIUS.sm,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  itemInfo: {
-    flex: 1,
-    marginLeft: SPACING.md
-  },
-  itemName: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.sm,
-    fontWeight: '600',
-    marginBottom: SPACING.xs
-  },
-  itemPrice: {
-    color: COLORS.textMuted,
-    fontSize: FONTS.sizes.xs
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.inputBackground,
-    borderRadius: BORDER_RADIUS.sm,
-    marginRight: SPACING.md
-  },
-  quantityButton: {
-    padding: SPACING.sm
-  },
-  quantityText: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.md,
-    fontWeight: 'bold',
-    minWidth: 24,
-    textAlign: 'center'
-  },
-  itemTotal: {
-    alignItems: 'flex-end'
-  },
-  itemTotalPrice: {
-    color: COLORS.royalGold,
-    fontSize: FONTS.sizes.md,
-    fontWeight: 'bold',
-    marginBottom: SPACING.xs
-  },
-  removeButton: {
-    padding: SPACING.xs
-  },
-  notesContainer: {
-    paddingHorizontal: SPACING.xl,
-    marginBottom: SPACING.md
-  },
-  notesLabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.sizes.sm,
-    marginBottom: SPACING.sm
-  },
+  itemIcon: { width: 44, height: 44, backgroundColor: COLORS.inputBackground, borderRadius: BORDER_RADIUS.sm, alignItems: 'center', justifyContent: 'center' },
+  itemInfo: { flex: 1, marginLeft: SPACING.sm },
+  itemName: { color: COLORS.textPrimary, fontSize: FONTS.sizes.sm, fontWeight: '600' },
+  itemPrice: { color: COLORS.textMuted, fontSize: FONTS.sizes.xs, marginTop: 2 },
+  qtyContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.inputBackground, borderRadius: BORDER_RADIUS.sm, marginHorizontal: SPACING.sm },
+  qtyBtn: { padding: SPACING.sm },
+  qtyText: { color: COLORS.textPrimary, fontSize: FONTS.sizes.sm, fontWeight: 'bold', minWidth: 20, textAlign: 'center' },
+  itemTotalCol: { alignItems: 'flex-end' },
+  itemTotal: { color: COLORS.royalGold, fontSize: FONTS.sizes.sm, fontWeight: 'bold' },
+  removeBtn: { padding: SPACING.xs, marginTop: 4 },
+  sectionPad: { paddingHorizontal: SPACING.xl, marginBottom: SPACING.md },
+  sectionLabel: { color: COLORS.textSecondary, fontSize: FONTS.sizes.sm, fontWeight: '600', marginBottom: SPACING.sm },
   notesInput: {
-    backgroundColor: COLORS.inputBackground,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.md,
-    minHeight: 80,
-    textAlignVertical: 'top'
+    backgroundColor: COLORS.inputBackground, borderRadius: BORDER_RADIUS.md, padding: SPACING.md,
+    color: COLORS.textPrimary, fontSize: FONTS.sizes.md, minHeight: 60, textAlignVertical: 'top'
   },
-  summaryContainer: {
-    backgroundColor: COLORS.cardBackground,
-    borderTopLeftRadius: BORDER_RADIUS.xl,
-    borderTopRightRadius: BORDER_RADIUS.xl,
-    padding: SPACING.xl,
-    ...SHADOWS.medium
+  paymentOption: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.cardBackground,
+    padding: SPACING.lg, borderRadius: BORDER_RADIUS.md, marginBottom: SPACING.sm,
+    borderWidth: 1, borderColor: COLORS.border, gap: SPACING.md
   },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.sm
+  paymentOptionActive: { borderColor: COLORS.royalGold, backgroundColor: COLORS.royalGold + '10' },
+  paymentRadio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: COLORS.textMuted, alignItems: 'center', justifyContent: 'center' },
+  paymentRadioActive: { borderColor: COLORS.royalGold },
+  paymentRadioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: COLORS.royalGold },
+  paymentTextCol: { flex: 1 },
+  paymentLabel: { color: COLORS.textPrimary, fontSize: FONTS.sizes.md },
+  paymentLabelActive: { fontWeight: 'bold', color: COLORS.royalGold },
+  paymentLabelAr: { color: COLORS.textMuted, fontSize: FONTS.sizes.sm, marginTop: 2 },
+  summary: { backgroundColor: COLORS.cardBackground, borderTopLeftRadius: BORDER_RADIUS.xl, borderTopRightRadius: BORDER_RADIUS.xl, padding: SPACING.xl, ...SHADOWS.medium },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.sm },
+  summaryLabel: { color: COLORS.textSecondary, fontSize: FONTS.sizes.md },
+  summaryValue: { color: COLORS.textPrimary, fontSize: FONTS.sizes.md },
+  freeText: { color: COLORS.success, fontWeight: 'bold' },
+  divider: { height: 1, backgroundColor: COLORS.border, marginVertical: SPACING.md },
+  totalLabel: { color: COLORS.textPrimary, fontSize: FONTS.sizes.xl, fontWeight: 'bold' },
+  totalValue: { color: COLORS.royalGold, fontSize: FONTS.sizes.xxl, fontWeight: 'bold' },
+  checkoutBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: COLORS.royalGold, paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md, marginTop: SPACING.lg, gap: SPACING.sm
   },
-  summaryLabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.sizes.md
+  checkoutBtnDisabled: { opacity: 0.7 },
+  checkoutBtnText: { color: COLORS.deepNavy, fontSize: FONTS.sizes.lg, fontWeight: 'bold' },
+  rtl: { textAlign: 'right' },
+
+  // Success Screen
+  successScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: SPACING.xl },
+  successIcon: { marginBottom: SPACING.lg },
+  successTitle: { fontSize: FONTS.sizes.xxl, fontWeight: 'bold', color: COLORS.textPrimary, textAlign: 'center', marginBottom: SPACING.sm },
+  successSubtitle: { fontSize: FONTS.sizes.md, color: COLORS.textSecondary, textAlign: 'center', marginBottom: SPACING.xl },
+  successCard: {
+    backgroundColor: COLORS.cardBackground, padding: SPACING.xl, borderRadius: BORDER_RADIUS.lg,
+    alignItems: 'center', width: '100%', marginBottom: SPACING.xl,
+    borderWidth: 1, borderColor: COLORS.royalGold + '40'
   },
-  summaryValue: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.md
-  },
-  freeText: {
-    color: COLORS.success,
-    fontWeight: 'bold'
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: SPACING.md
-  },
-  totalLabel: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.sizes.lg,
-    fontWeight: 'bold'
-  },
-  totalValue: {
-    color: COLORS.royalGold,
-    fontSize: FONTS.sizes.xl,
-    fontWeight: 'bold'
-  },
-  checkoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.royalGold,
-    paddingVertical: SPACING.lg,
-    borderRadius: BORDER_RADIUS.md,
-    marginTop: SPACING.lg,
-    gap: SPACING.sm
-  },
-  checkoutButtonDisabled: {
-    opacity: 0.7
-  },
-  checkoutButtonText: {
-    color: COLORS.deepNavy,
-    fontSize: FONTS.sizes.lg,
-    fontWeight: 'bold'
-  },
-  rtlText: {
-    textAlign: 'right'
-  }
+  successLabel: { color: COLORS.textMuted, fontSize: FONTS.sizes.sm, marginBottom: SPACING.xs },
+  successTotal: { color: COLORS.royalGold, fontSize: 36, fontWeight: 'bold', marginBottom: SPACING.sm },
+  successPayment: { color: COLORS.textSecondary, fontSize: FONTS.sizes.md },
+  successMessage: { color: COLORS.textSecondary, fontSize: FONTS.sizes.sm, textAlign: 'center', marginBottom: SPACING.xl },
+  successCompany: { alignItems: 'center', marginBottom: SPACING.xxl },
+  successCompanyName: { color: COLORS.royalGold, fontSize: FONTS.sizes.md, fontWeight: 'bold' },
+  successCompanyTag: { color: COLORS.textMuted, fontSize: FONTS.sizes.sm, marginTop: 4 },
+  successBtn: { backgroundColor: COLORS.royalGold, paddingVertical: SPACING.lg, paddingHorizontal: SPACING.xxxl * 2, borderRadius: BORDER_RADIUS.md, marginBottom: SPACING.md },
+  successBtnText: { color: COLORS.deepNavy, fontSize: FONTS.sizes.md, fontWeight: 'bold' },
+  successBtnSec: { paddingVertical: SPACING.md },
+  successBtnSecText: { color: COLORS.textSecondary, fontSize: FONTS.sizes.md }
 });

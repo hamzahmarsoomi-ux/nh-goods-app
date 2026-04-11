@@ -139,9 +139,11 @@ class Order(BaseModel):
     user_name: str
     user_phone: str
     shop_name: Optional[str] = None
+    shop_address: Optional[str] = None
     items: List[CartItem]
     total: float
-    status: str = "pending"  # pending, confirmed, delivering, delivered, cancelled
+    payment_method: str = "bank_transfer"  # bank_check, bank_transfer
+    status: str = "pending"
     notes: Optional[str] = None
     voice_order_url: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -151,6 +153,7 @@ class OrderCreate(BaseModel):
     items: List[CartItem]
     notes: Optional[str] = None
     voice_order_base64: Optional[str] = None
+    payment_method: str = "bank_transfer"
 
 class VoiceOrder(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -164,6 +167,14 @@ class VoiceOrder(BaseModel):
 
 class VoiceOrderCreate(BaseModel):
     audio_base64: str
+
+class InquiryCreate(BaseModel):
+    image_base64: str
+    inquiry_type: str  # availability, pricing, request
+    message: Optional[str] = None
+
+class InquiryReply(BaseModel):
+    reply: str
 
 class ActivityLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -598,22 +609,26 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
         user_name=current_user["name"],
         user_phone=current_user["phone_number"],
         shop_name=current_user.get("shop_name"),
+        shop_address=current_user.get("shop_address"),
         items=data.items,
         total=total,
+        payment_method=data.payment_method,
         notes=data.notes
     )
     
-    await db.orders.insert_one(order.dict())
+    order_dict = order.dict()
+    await db.orders.insert_one(order_dict)
     
     # Log activity
     await log_activity(
         current_user["id"],
         current_user["name"],
         "place_order",
-        {"order_id": order.id, "total": total, "items_count": len(data.items)}
+        {"order_id": order.id, "total": total, "items_count": len(data.items), "payment_method": data.payment_method}
     )
     
-    return order
+    # Return clean response (exclude _id)
+    return {k: v for k, v in order_dict.items() if k != '_id'}
 
 @api_router.get("/orders")
 async def get_user_orders(current_user: dict = Depends(get_current_user)):
@@ -809,6 +824,48 @@ async def get_invoices(current_user: dict = Depends(get_current_user)):
         })
     
     return invoices
+
+# ==================== SNAP & ASK (INQUIRY) ROUTES ====================
+
+@api_router.post("/inquiries")
+async def create_inquiry(data: InquiryCreate, current_user: dict = Depends(get_current_user)):
+    inquiry = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user["id"],
+        "user_name": current_user["name"],
+        "user_phone": current_user["phone_number"],
+        "shop_name": current_user.get("shop_name"),
+        "shop_address": current_user.get("shop_address"),
+        "image_base64": data.image_base64,
+        "inquiry_type": data.inquiry_type,
+        "message": data.message,
+        "status": "pending",
+        "admin_reply": None,
+        "created_at": datetime.utcnow()
+    }
+    await db.inquiries.insert_one(inquiry)
+    await log_activity(current_user["id"], current_user["name"], "snap_ask", {"type": data.inquiry_type})
+    return {"id": inquiry["id"], "message": "Inquiry sent successfully"}
+
+@api_router.get("/inquiries")
+async def get_inquiries(current_user: dict = Depends(get_current_user)):
+    if current_user.get("is_admin"):
+        docs = await db.inquiries.find().sort("created_at", -1).to_list(200)
+    else:
+        docs = await db.inquiries.find({"user_id": current_user["id"]}).sort("created_at", -1).to_list(200)
+    return [{k: v for k, v in d.items() if k != '_id'} for d in docs]
+
+@api_router.put("/admin/inquiries/{inquiry_id}/reply")
+async def reply_inquiry(inquiry_id: str, data: InquiryReply, current_user: dict = Depends(get_current_user)):
+    if not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    result = await db.inquiries.update_one(
+        {"id": inquiry_id},
+        {"$set": {"admin_reply": data.reply, "status": "replied"}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Inquiry not found")
+    return {"message": "Reply sent"}
 
 # ==================== SEED DATA ====================
 

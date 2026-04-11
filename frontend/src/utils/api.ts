@@ -88,3 +88,11 @@ export const getFlashDeals = () => api.get('/flash-deals');
 export const getLastOrder = () => api.get('/last-order');
 
 export const reorder = (orderId: string) => api.post(`/reorder/${orderId}`);
+
+export const createInquiry = (data: { image_base64: string; inquiry_type: string; message?: string }) =>
+  api.post('/inquiries', data);
+
+export const getInquiries = () => api.get('/inquiries');
+
+export const replyInquiry = (id: string, reply: string) =>
+  api.put(`/admin/inquiries/${id}/reply`, { reply });

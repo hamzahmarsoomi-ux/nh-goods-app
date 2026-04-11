@@ -9,14 +9,21 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Take photos of products to inquire about pricing",
+        "NSPhotoLibraryUsageDescription": "Upload product photos for wholesale inquiries",
+        "NSLocationWhenInUseUsageDescription": "Detect when you are at your shop",
+        "NSMicrophoneUsageDescription": "Record voice orders for quick ordering"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000"
+        "backgroundColor": "#0A1628"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "ACCESS_FINE_LOCATION", "RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",

@@ -157,6 +157,10 @@ export default function HomeScreen() {
             <Ionicons name="checkmark-circle-outline" size={16} color={COLORS.success} />
             <Text style={styles.badgeText}>{t('noMinimum')}</Text>
           </View>
+          <Pressable testID="snap-ask-btn" style={styles.snapBadge} onPress={() => router.push('/snap-ask')}>
+            <Ionicons name="camera" size={16} color={COLORS.royalGold} />
+            <Text style={styles.snapBadgeText}>Snap & Ask</Text>
+          </Pressable>
         </View>
 
         {/* One-Tap Reorder */}
@@ -326,6 +330,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md, borderRadius: BORDER_RADIUS.full
   },
   badgeText: { color: COLORS.success, fontSize: FONTS.sizes.xs, fontWeight: 'bold' },
+  snapBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: SPACING.xs,
+    backgroundColor: COLORS.royalGold + '20', paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md, borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1, borderColor: COLORS.royalGold
+  },
+  snapBadgeText: { color: COLORS.royalGold, fontSize: FONTS.sizes.xs, fontWeight: 'bold' },
   section: { paddingHorizontal: SPACING.xl, marginBottom: SPACING.xl },
   sectionHeader: {
     flexDirection: 'row', justifyContent: 'space-between',
