@@ -19,7 +19,7 @@ import { useAuthStore } from '../../src/store/authStore';
 import { useCartStore } from '../../src/store/cartStore';
 import { getCategories, getProducts, getFlashDeals, getLastOrder, reorder } from '../../src/utils/api';
 
-const WHATSAPP_NUMBER = '+16035551234';
+const WHATSAPP_NUMBER = '+16034611441';
 
 export default function HomeScreen() {
   const { t, rtl, language } = useTranslation();

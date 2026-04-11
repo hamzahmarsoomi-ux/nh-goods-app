@@ -394,7 +394,12 @@ async def get_activity_logs(
         raise HTTPException(status_code=403, detail="Admin access required")
     
     logs = await db.activity_logs.find().sort("timestamp", -1).limit(limit).to_list(limit)
-    return logs
+    # Clean up ObjectId
+    result = []
+    for log in logs:
+        log_dict = {k: v for k, v in log.items() if k != '_id'}
+        result.append(log_dict)
+    return result
 
 @api_router.get("/admin/voice-orders")
 async def get_voice_orders(current_user: dict = Depends(get_current_user)):
@@ -614,7 +619,12 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
 async def get_user_orders(current_user: dict = Depends(get_current_user)):
     query = {"user_id": current_user["id"]} if not current_user.get("is_admin") else {}
     orders = await db.orders.find(query).sort("created_at", -1).to_list(1000)
-    return orders
+    # Clean up ObjectId
+    result = []
+    for order in orders:
+        order_dict = {k: v for k, v in order.items() if k != '_id'}
+        result.append(order_dict)
+    return result
 
 @api_router.get("/orders/{order_id}")
 async def get_order(order_id: str, current_user: dict = Depends(get_current_user)):
