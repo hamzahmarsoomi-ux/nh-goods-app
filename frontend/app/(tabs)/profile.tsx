@@ -262,6 +262,35 @@ export default function ProfileScreen() {
           <Text style={styles.footerLocation}>Hooksett, NH</Text>
         </View>
         
+        {/* About Us */}
+        <View style={styles.aboutSection}>
+          <View style={styles.aboutHeader}>
+            <Ionicons name="business-outline" size={22} color={COLORS.royalGold} />
+            <Text style={styles.aboutTitle}>About Us</Text>
+          </View>
+          <View style={styles.aboutDivider} />
+          <Text style={styles.aboutText}>
+            NH Quality Goods LLC is your strategic sourcing and delivery partner. We bridge the gap between global manufacturers and your business, bringing world-class products directly to your doorstep.
+          </Text>
+          <Text style={styles.aboutText}>
+            We value your time. That's why we specialize in supplying the world's most in-demand products and global brands. Our mission is to streamline your supply chain, allowing you to focus on growth while we handle the logistics of quality and excellence.
+          </Text>
+          <View style={styles.aboutValues}>
+            <View style={styles.aboutValueItem}>
+              <Ionicons name="globe-outline" size={18} color={COLORS.royalGold} />
+              <Text style={styles.aboutValueText}>Global Sourcing</Text>
+            </View>
+            <View style={styles.aboutValueItem}>
+              <Ionicons name="car-outline" size={18} color={COLORS.royalGold} />
+              <Text style={styles.aboutValueText}>Direct Delivery</Text>
+            </View>
+            <View style={styles.aboutValueItem}>
+              <Ionicons name="diamond-outline" size={18} color={COLORS.royalGold} />
+              <Text style={styles.aboutValueText}>Quality & Excellence</Text>
+            </View>
+          </View>
+        </View>
+        
         <View style={{ height: 30 }} />
       </ScrollView>
     </SafeAreaView>
@@ -520,5 +549,50 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
     marginTop: SPACING.xs
+  },
+  aboutSection: {
+    marginHorizontal: SPACING.xl,
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.xl,
+    marginBottom: SPACING.xl,
+    borderWidth: 1,
+    borderColor: COLORS.royalGold + '20'
+  },
+  aboutHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md
+  },
+  aboutTitle: {
+    fontSize: FONTS.sizes.lg,
+    fontWeight: 'bold',
+    color: COLORS.royalGold
+  },
+  aboutDivider: {
+    height: 1,
+    backgroundColor: COLORS.royalGold + '30',
+    marginBottom: SPACING.lg
+  },
+  aboutText: {
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+    marginBottom: SPACING.md
+  },
+  aboutValues: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SPACING.sm
+  },
+  aboutValueItem: {
+    alignItems: 'center',
+    gap: SPACING.xs
+  },
+  aboutValueText: {
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    fontWeight: '600'
   }
 });
