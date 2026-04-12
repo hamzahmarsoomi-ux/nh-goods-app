@@ -87,7 +87,7 @@ export default function MarketplaceScreen() {
         </Pressable>
         <View style={s.headerText}>
           <Text style={s.headerTitle}>Neighbor Exchange</Text>
-          <Text style={s.headerSub}>Buy & sell surplus between stores</Text>
+          <Text style={s.headerSub}>Download the app, we promote for you!</Text>
         </View>
       </View>
 
@@ -145,7 +145,7 @@ export default function MarketplaceScreen() {
           <View style={s.empty}>
             <Ionicons name="swap-horizontal" size={60} color={COLORS.textMuted} />
             <Text style={s.emptyTitle}>{tab === 'mine' ? 'No listings yet' : 'No surplus available'}</Text>
-            <Text style={s.emptyText}>Post your surplus and help your neighbor stores!</Text>
+            <Text style={s.emptyText}>Download the app and list your surplus.{'\n'}We help you find buyers and promote your products!</Text>
           </View>
         }
       />
