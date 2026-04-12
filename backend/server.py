@@ -101,6 +101,7 @@ class Product(BaseModel):
     unit: str = "each"
     stock: int = 0
     image_base64: Optional[str] = None
+    image_url: Optional[str] = None
     is_available: bool = True
     is_flash_deal: bool = False
     flash_deal_price: Optional[float] = None
@@ -125,6 +126,7 @@ class ProductCreate(BaseModel):
     unit: str = "each"
     stock: int = 0
     image_base64: Optional[str] = None
+    image_url: Optional[str] = None
     is_available: bool = True
     is_flash_deal: bool = False
     flash_deal_price: Optional[float] = None
@@ -1034,8 +1036,8 @@ async def seed_database():
     if product_count == 0:
         sample_products = [
             # Cakes, Donuts & Pastry
-            {"id": str(uuid.uuid4()), "name": "7 Days Soft Croissant Chocolate 2.65oz", "description": "6 Piece", "category": "cakes_pastry", "price": 8.5, "wholesale_price": 8.5, "unit": "case", "stock": 100, "is_available": True, "created_at": datetime.utcnow(), "updated_at": datetime.utcnow()},
-            {"id": str(uuid.uuid4()), "name": "7 Days Soft Croissant Vanilla 2.65oz", "description": "6 Piece", "category": "cakes_pastry", "price": 8.5, "wholesale_price": 8.5, "unit": "case", "stock": 100, "is_available": True, "created_at": datetime.utcnow(), "updated_at": datetime.utcnow()},
+            {"id": str(uuid.uuid4()), "name": "7 Days Soft Croissant Chocolate 2.65oz", "description": "6 Piece", "category": "cakes_pastry", "price": 8.5, "wholesale_price": 8.5, "unit": "case", "stock": 100, "is_available": True, "image_url": "https://customer-assets.emergentagent.com/job_nh-bakery-snacks/artifacts/th62bljq_Screenshot%202026-04-09%20154249.png", "created_at": datetime.utcnow(), "updated_at": datetime.utcnow()},
+            {"id": str(uuid.uuid4()), "name": "7 Days Soft Croissant Vanilla 2.65oz", "description": "6 Piece", "category": "cakes_pastry", "price": 8.5, "wholesale_price": 8.5, "unit": "case", "stock": 100, "is_available": True, "image_url": "https://customer-assets.emergentagent.com/job_nh-bakery-snacks/artifacts/206ksj4c_Screenshot%202026-04-09%20154446.png", "created_at": datetime.utcnow(), "updated_at": datetime.utcnow()},
             {"id": str(uuid.uuid4()), "name": "Hostess Chocolate Cup Cakes", "description": "12 Piece", "category": "cakes_pastry", "price": 9.5, "wholesale_price": 9.5, "unit": "case", "stock": 120, "is_available": True, "created_at": datetime.utcnow(), "updated_at": datetime.utcnow()},
             {"id": str(uuid.uuid4()), "name": "Hostess Chocolate Zinger Single-Serve Caddy", "description": "12 Piece", "category": "cakes_pastry", "price": 9.6, "wholesale_price": 9.6, "unit": "case", "stock": 90, "is_available": True, "created_at": datetime.utcnow(), "updated_at": datetime.utcnow()},
             {"id": str(uuid.uuid4()), "name": "Hostess Raspberry Zinger Single-Serve Caddy", "description": "12 Piece", "category": "cakes_pastry", "price": 9.4, "wholesale_price": 9.4, "unit": "case", "stock": 90, "is_available": True, "created_at": datetime.utcnow(), "updated_at": datetime.utcnow()},

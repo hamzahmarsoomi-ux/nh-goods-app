@@ -7,7 +7,8 @@ import {
   Pressable,
   ActivityIndicator,
   TextInput,
-  RefreshControl
+  RefreshControl,
+  Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
@@ -99,8 +100,8 @@ export default function CatalogScreen() {
   const renderProduct = ({ item }: { item: any }) => (
     <View style={styles.productCard}>
       <View style={styles.productImageContainer}>
-        {item.image_base64 ? (
-          <View style={styles.productImage} />
+        {item.image_url ? (
+          <Image source={{ uri: item.image_url }} style={styles.productImage} resizeMode="cover" />
         ) : (
           <View style={styles.productImagePlaceholder}>
             <Ionicons name="cube-outline" size={40} color={COLORS.textMuted} />
