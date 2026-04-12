@@ -30,7 +30,9 @@ export default function AdminUsersScreen() {
     pin: '',
     name: '',
     shop_name: '',
-    shop_address: ''
+    shop_address: '',
+    shop_latitude: '',
+    shop_longitude: ''
   });
   const [isCreating, setIsCreating] = useState(false);
   
@@ -63,9 +65,13 @@ export default function AdminUsersScreen() {
     
     setIsCreating(true);
     try {
-      await createUser(newUser);
+      await createUser({
+        ...newUser,
+        shop_latitude: newUser.shop_latitude ? parseFloat(newUser.shop_latitude) : undefined,
+        shop_longitude: newUser.shop_longitude ? parseFloat(newUser.shop_longitude) : undefined
+      });
       setShowAddModal(false);
-      setNewUser({ phone_number: '', pin: '', name: '', shop_name: '', shop_address: '' });
+      setNewUser({ phone_number: '', pin: '', name: '', shop_name: '', shop_address: '', shop_latitude: '', shop_longitude: '' });
       loadUsers();
       Alert.alert('Success', 'Customer created successfully');
     } catch (error: any) {
@@ -257,6 +263,27 @@ export default function AdminUsersScreen() {
               value={newUser.shop_address}
               onChangeText={(text) => setNewUser({ ...newUser, shop_address: text })}
             />
+            
+            <Text style={styles.gpsLabel}>GPS Coordinates (for presence tracking)</Text>
+            <View style={styles.gpsRow}>
+              <TextInput
+                style={[styles.input, styles.gpsInput]}
+                placeholder="Latitude"
+                placeholderTextColor={COLORS.textMuted}
+                value={newUser.shop_latitude}
+                onChangeText={(text) => setNewUser({ ...newUser, shop_latitude: text })}
+                keyboardType="decimal-pad"
+              />
+              <TextInput
+                style={[styles.input, styles.gpsInput]}
+                placeholder="Longitude"
+                placeholderTextColor={COLORS.textMuted}
+                value={newUser.shop_longitude}
+                onChangeText={(text) => setNewUser({ ...newUser, shop_longitude: text })}
+                keyboardType="decimal-pad"
+              />
+            </View>
+            <Text style={styles.gpsHint}>Find coordinates from Google Maps</Text>
             
             <Pressable
               style={[styles.createButton, isCreating && styles.createButtonDisabled]}
@@ -465,5 +492,24 @@ const styles = StyleSheet.create({
     color: COLORS.deepNavy,
     fontSize: FONTS.sizes.md,
     fontWeight: 'bold'
+  },
+  gpsLabel: {
+    color: COLORS.royalGold,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: '600',
+    marginBottom: SPACING.sm
+  },
+  gpsRow: {
+    flexDirection: 'row',
+    gap: SPACING.md
+  },
+  gpsInput: {
+    flex: 1
+  },
+  gpsHint: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.xs,
+    marginBottom: SPACING.md,
+    marginTop: -SPACING.sm
   }
 });
