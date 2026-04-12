@@ -32,8 +32,25 @@ export default function InvoiceBuilderScreen() {
 
   useEffect(() => {
     loadData();
-    setInvoiceNumber(`INV-${Date.now().toString().slice(-6)}`);
+    loadNextInvoiceNumber();
   }, []);
+
+  const loadNextInvoiceNumber = async () => {
+    try {
+      const stored = await import('@react-native-async-storage/async-storage');
+      const lastNum = await stored.default.getItem('last_invoice_number');
+      const next = lastNum ? parseInt(lastNum) + 1 : 1;
+      setInvoiceNumber(`HM-${String(next).padStart(4, '0')}`);
+    } catch { setInvoiceNumber('HM-0001'); }
+  };
+
+  const saveInvoiceNumber = async () => {
+    try {
+      const num = parseInt(invoiceNumber.replace('HM-', '')) || 0;
+      const stored = await import('@react-native-async-storage/async-storage');
+      await stored.default.setItem('last_invoice_number', String(num));
+    } catch {}
+  };
 
   const loadData = async () => {
     try {
@@ -123,7 +140,7 @@ export default function InvoiceBuilderScreen() {
         .footer-brand{font-size:13px;color:#D4AF37;margin-top:4px;}
       </style></head><body>
         <div class="header">
-          <div><div class="logo">NH GOODS</div><div class="company">NH QUALITY GOODS LLC</div><div class="tagline">Vision & Faith | الرؤية والإيمان</div></div>
+          <div><div class="logo">NH GOODS</div><div class="company">NH QUALITY GOODS LLC</div><div class="tagline">Hamzah Marsoomi | Owner</div></div>
           <div><div class="invoice-title">INVOICE</div><div class="invoice-num">${invoiceNumber}</div><div class="invoice-num">${date}</div></div>
         </div>
         <div class="info-grid">
@@ -137,7 +154,8 @@ export default function InvoiceBuilderScreen() {
           </div>
           <div class="info-box">
             <div class="info-label">From</div>
-            <div class="info-value">NH QUALITY GOODS LLC</div>
+            <div class="info-value">Hamzah Marsoomi</div>
+            <div class="info-value" style="font-size:12px;color:#A0B4C8;">NH QUALITY GOODS LLC</div>
             <div class="info-value" style="font-size:12px;color:#A0B4C8;">Hooksett, NH</div>
             <div class="info-value" style="font-size:12px;color:#A0B4C8;">Phone: (603) 461-1441</div>
           </div>
@@ -155,12 +173,13 @@ export default function InvoiceBuilderScreen() {
         <div class="footer">
           <div class="footer-text">Thank you for your business!</div>
           <div class="footer-brand">More than a supplier.. We are your growth partner.</div>
-          <div class="footer-text" style="margin-top:8px;">NH QUALITY GOODS LLC | Hooksett, NH | (603) 461-1441</div>
+          <div class="footer-text" style="margin-top:8px;">Hamzah Marsoomi | NH QUALITY GOODS LLC | Hooksett, NH | (603) 461-1441</div>
         </div>
       </body></html>`;
 
       const { uri } = await Print.printToFileAsync({ html, base64: false });
       await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: `Invoice ${invoiceNumber}` });
+      await saveInvoiceNumber();
     } catch (e) {
       console.error(e);
       Alert.alert('Error', 'Failed to generate invoice');
