@@ -12,8 +12,8 @@ import { useCartStore } from '../../src/store/cartStore';
 import { createOrder } from '../../src/utils/api';
 
 const PAYMENT_METHODS = [
-  { id: 'bank_check', label: 'Bank Check', labelAr: 'شيك بنكي', icon: 'document-text-outline' },
-  { id: 'bank_transfer', label: 'Bank Transfer', labelAr: 'تحويل بنكي', icon: 'swap-horizontal-outline' }
+  { id: 'bank_check', label: 'Bank Check', labelAr: 'شيك بنكي', icon: 'document-text-outline', desc: 'Mail check to NH QUALITY GOODS LLC' },
+  { id: 'check_photo', label: 'Send Check Photo', labelAr: 'إرسال صورة الشيك', icon: 'camera-outline', desc: 'Take a clear photo of both sides' }
 ];
 
 export default function CartScreen() {
@@ -100,9 +100,22 @@ export default function CartScreen() {
             <Text style={s.successLabel}>Order #{lastOrderId}</Text>
             <Text style={s.successTotal}>${lastOrderTotal.toFixed(2)}</Text>
             <Text style={s.successPayment}>
-              Payment: {paymentMethod === 'bank_check' ? 'Bank Check (شيك بنكي)' : 'Bank Transfer (تحويل بنكي)'}
+              Payment: {paymentMethod === 'bank_check' ? 'Bank Check (شيك بنكي)' : 'Check Photo (صورة الشيك)'}
             </Text>
           </View>
+          {paymentMethod === 'check_photo' && (
+            <View style={s.checkInstructions}>
+              <Ionicons name="camera" size={20} color={COLORS.royalGold} />
+              <Text style={s.checkInstructionsTitle}>Send check photo via Messages</Text>
+              <Text style={s.checkInstructionsText}>
+                Make check payable to:{'\n'}
+                <Text style={s.checkCompanyName}>NH QUALITY GOODS LLC</Text>{'\n'}
+                Hamzah Marsoomi{'\n'}
+                Hooksett, NH{'\n\n'}
+                Take a clear photo of BOTH sides and send via Messages.
+              </Text>
+            </View>
+          )}
           <Text style={s.successMessage}>
             We will process your delivery from our Hooksett warehouse shortly.
           </Text>
@@ -175,6 +188,7 @@ export default function CartScreen() {
                 <View style={s.paymentTextCol}>
                   <Text style={[s.paymentLabel, paymentMethod === pm.id && s.paymentLabelActive]}>{pm.label}</Text>
                   <Text style={s.paymentLabelAr}>{pm.labelAr}</Text>
+                  <Text style={s.paymentDesc}>{pm.desc}</Text>
                 </View>
               </Pressable>
             ))}
@@ -257,6 +271,7 @@ const s = StyleSheet.create({
   paymentLabel: { color: COLORS.textPrimary, fontSize: FONTS.sizes.md },
   paymentLabelActive: { fontWeight: 'bold', color: COLORS.royalGold },
   paymentLabelAr: { color: COLORS.textMuted, fontSize: FONTS.sizes.sm, marginTop: 2 },
+  paymentDesc: { color: COLORS.textMuted, fontSize: FONTS.sizes.xs, marginTop: 2 },
   summary: { backgroundColor: COLORS.cardBackground, borderTopLeftRadius: BORDER_RADIUS.xl, borderTopRightRadius: BORDER_RADIUS.xl, padding: SPACING.xl, ...SHADOWS.medium },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.sm },
   summaryLabel: { color: COLORS.textSecondary, fontSize: FONTS.sizes.md },
@@ -294,5 +309,9 @@ const s = StyleSheet.create({
   successBtn: { backgroundColor: COLORS.royalGold, paddingVertical: SPACING.lg, paddingHorizontal: SPACING.xxxl * 2, borderRadius: BORDER_RADIUS.md, marginBottom: SPACING.md },
   successBtnText: { color: COLORS.deepNavy, fontSize: FONTS.sizes.md, fontWeight: 'bold' },
   successBtnSec: { paddingVertical: SPACING.md },
-  successBtnSecText: { color: COLORS.textSecondary, fontSize: FONTS.sizes.md }
+  successBtnSecText: { color: COLORS.textSecondary, fontSize: FONTS.sizes.md },
+  checkInstructions: { alignItems: 'center', backgroundColor: COLORS.cardBackground, padding: SPACING.xl, borderRadius: BORDER_RADIUS.lg, marginBottom: SPACING.xl, width: '100%', borderWidth: 1, borderColor: COLORS.royalGold + '30' },
+  checkInstructionsTitle: { color: COLORS.royalGold, fontSize: FONTS.sizes.md, fontWeight: 'bold', marginTop: SPACING.sm, marginBottom: SPACING.sm },
+  checkInstructionsText: { color: COLORS.textSecondary, fontSize: FONTS.sizes.sm, textAlign: 'center', lineHeight: 22 },
+  checkCompanyName: { color: COLORS.royalGold, fontWeight: 'bold', fontSize: FONTS.sizes.md }
 });
