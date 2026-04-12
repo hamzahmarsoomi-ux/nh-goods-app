@@ -5,6 +5,7 @@ import { useAuthStore } from '../src/store/authStore';
 import { COLORS, FONTS, SPACING } from '../src/utils/theme';
 import { seedDatabase } from '../src/utils/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import LogoWatermark from '../src/components/LogoWatermark';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function SplashScreen() {
   
   return (
     <SafeAreaView style={styles.container}>
+      <LogoWatermark />
       <View style={styles.content}>
         {/* Logo Area */}
         <View style={styles.logoContainer}>

@@ -17,6 +17,7 @@ import { useTranslation } from '../../src/hooks/useTranslation';
 import { useAuthStore } from '../../src/store/authStore';
 import { useCartStore } from '../../src/store/cartStore';
 import { getCategories, getProducts, getFlashDeals, getLastOrder, reorder } from '../../src/utils/api';
+import LogoWatermark from '../../src/components/LogoWatermark';
 
 export default function HomeScreen() {
   const { t, rtl, language } = useTranslation();
@@ -113,6 +114,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <LogoWatermark />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
