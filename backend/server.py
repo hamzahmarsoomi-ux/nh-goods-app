@@ -623,10 +623,9 @@ async def delete_product(product_id: str, current_user: dict = Depends(get_curre
 @api_router.get("/categories")
 async def get_categories():
     return [
-        {"id": "bakery", "name": "Bakery", "name_es": "Panadería", "name_hi": "बेकरी", "name_ne": "बेकरी", "name_ur": "بیکری"},
-        {"id": "cakes_sweets", "name": "Cakes & Sweets", "name_es": "Pasteles y Dulces", "name_hi": "केक और मिठाई", "name_ne": "केक र मिठाई", "name_ur": "کیک اور مٹھائیاں"},
-        {"id": "premium_snacks", "name": "Premium Snacks", "name_es": "Snacks Premium", "name_hi": "प्रीमियम स्नैक्स", "name_ne": "प्रिमियम स्न्याक्स", "name_ur": "پریمیم اسنیکس"},
-        {"id": "energy_beverages", "name": "Energy & Beverages", "name_es": "Energía y Bebidas", "name_hi": "एनर्जी और पेय", "name_ne": "ऊर्जा र पेय", "name_ur": "انرجی اور مشروبات"}
+        {"id": "cakes_pastry", "name": "Cakes, Donuts & Pastry", "name_es": "Pasteles, Donas y Repostería", "name_hi": "केक, डोनट और पेस्ट्री", "name_ne": "केक, डोनट र पेस्ट्री", "name_ur": "کیک، ڈونٹس اور پیسٹری", "name_zh": "蛋糕、甜甜圈和糕点"},
+        {"id": "nuts_seeds", "name": "Nuts, Seeds & Trail Mix", "name_es": "Nueces, Semillas y Mezcla", "name_hi": "नट्स, बीज और ट्रेल मिक्स", "name_ne": "नट्स, बीउ र ट्रेल मिक्स", "name_ur": "گری دار میوے، بیج اور ٹریل مکس", "name_zh": "坚果、种子和混合零食"},
+        {"id": "energy_drinks", "name": "Energy Drinks", "name_es": "Bebidas Energéticas", "name_hi": "एनर्जी ड्रिंक्स", "name_ne": "ऊर्जा पेय", "name_ur": "انرجی ڈرنکس", "name_zh": "能量饮料"}
     ]
 
 # ==================== ORDER ROUTES ====================
@@ -1034,45 +1033,14 @@ async def seed_database():
     product_count = await db.products.count_documents({})
     if product_count == 0:
         sample_products = [
-            # Bakery
-            {
-                "id": str(uuid.uuid4()),
-                "name": "7 Days Soft Croissants",
-                "name_es": "Croissants Suaves 7 Days",
-                "name_ur": "7 ڈیز سافٹ کروسینٹس",
-                "description": "Soft, fluffy croissants perfect for breakfast",
-                "category": "bakery",
-                "price": 3.99,
-                "wholesale_price": 2.49,
-                "unit": "pack",
-                "stock": 100,
-                "is_available": True,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "name": "Mini Muffins Variety Pack",
-                "name_es": "Paquete Variado de Mini Muffins",
-                "name_ur": "منی مفنز ورائٹی پیک",
-                "description": "Assorted mini muffins - blueberry, chocolate chip, banana",
-                "category": "bakery",
-                "price": 5.99,
-                "wholesale_price": 3.99,
-                "unit": "pack",
-                "stock": 75,
-                "is_available": True,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            },
-            # Cakes & Sweets
+            # Cakes, Donuts & Pastry
             {
                 "id": str(uuid.uuid4()),
                 "name": "Hostess Cupcakes",
                 "name_es": "Cupcakes Hostess",
                 "name_ur": "ہوسٹیس کپ کیکس",
                 "description": "Classic chocolate cupcakes with cream filling",
-                "category": "cakes_sweets",
+                "category": "cakes_pastry",
                 "price": 4.49,
                 "wholesale_price": 2.99,
                 "unit": "box",
@@ -1087,7 +1055,7 @@ async def seed_database():
                 "name_es": "Zingers Hostess",
                 "name_ur": "ہوسٹیس زنگرز",
                 "description": "Raspberry iced devil's food cakes",
-                "category": "cakes_sweets",
+                "category": "cakes_pastry",
                 "price": 4.49,
                 "wholesale_price": 2.99,
                 "unit": "box",
@@ -1096,14 +1064,29 @@ async def seed_database():
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()
             },
-            # Premium Snacks
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Glazed Donuts 6-Pack",
+                "name_es": "Donas Glaseadas 6-Pack",
+                "name_ur": "گلیزڈ ڈونٹس 6 پیک",
+                "description": "Fresh glazed donuts, pack of 6",
+                "category": "cakes_pastry",
+                "price": 5.99,
+                "wholesale_price": 3.49,
+                "unit": "pack",
+                "stock": 80,
+                "is_available": True,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            # Nuts, Seeds & Trail Mix
             {
                 "id": str(uuid.uuid4()),
                 "name": "Sahale Glazed Nuts",
                 "name_es": "Nueces Glaseadas Sahale",
                 "name_ur": "ساہالے گلیزڈ نٹس",
                 "description": "Premium honey glazed mixed nuts",
-                "category": "premium_snacks",
+                "category": "nuts_seeds",
                 "price": 6.99,
                 "wholesale_price": 4.49,
                 "unit": "bag",
@@ -1114,30 +1097,14 @@ async def seed_database():
             },
             {
                 "id": str(uuid.uuid4()),
-                "name": "Pringles Original",
-                "name_es": "Pringles Original",
-                "name_ur": "پرنگلز اوریجنل",
-                "description": "Classic potato crisps in signature can",
-                "category": "premium_snacks",
-                "price": 2.99,
-                "wholesale_price": 1.79,
-                "unit": "can",
-                "stock": 200,
-                "is_available": True,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            },
-            # Energy & Beverages
-            {
-                "id": str(uuid.uuid4()),
-                "name": "Black Rifle Coffee",
-                "name_es": "Café Black Rifle",
-                "name_ur": "بلیک رائفل کافی",
-                "description": "Premium ready-to-drink cold brew coffee",
-                "category": "energy_beverages",
+                "name": "Sunflower Seeds",
+                "name_es": "Semillas de Girasol",
+                "name_ur": "سورج مکھی کے بیج",
+                "description": "Roasted and salted sunflower seeds",
+                "category": "nuts_seeds",
                 "price": 3.49,
-                "wholesale_price": 2.29,
-                "unit": "can",
+                "wholesale_price": 1.99,
+                "unit": "bag",
                 "stock": 150,
                 "is_available": True,
                 "created_at": datetime.utcnow(),
@@ -1145,15 +1112,61 @@ async def seed_database():
             },
             {
                 "id": str(uuid.uuid4()),
+                "name": "Trail Mix Classic",
+                "name_es": "Mezcla de Frutos Secos",
+                "name_ur": "ٹریل مکس کلاسک",
+                "description": "Mixed nuts, raisins, and chocolate chips",
+                "category": "nuts_seeds",
+                "price": 5.49,
+                "wholesale_price": 3.29,
+                "unit": "bag",
+                "stock": 100,
+                "is_available": True,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            # Energy Drinks
+            {
+                "id": str(uuid.uuid4()),
                 "name": "5-hour Energy",
                 "name_es": "5-hour Energy",
                 "name_ur": "5 گھنٹے انرجی",
                 "description": "Extra strength energy shot",
-                "category": "energy_beverages",
+                "category": "energy_drinks",
                 "price": 3.99,
                 "wholesale_price": 2.49,
                 "unit": "bottle",
                 "stock": 180,
+                "is_available": True,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Monster Energy",
+                "name_es": "Monster Energy",
+                "name_ur": "مونسٹر انرجی",
+                "description": "Original green energy drink 16oz",
+                "category": "energy_drinks",
+                "price": 3.49,
+                "wholesale_price": 2.19,
+                "unit": "can",
+                "stock": 200,
+                "is_available": True,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Red Bull",
+                "name_es": "Red Bull",
+                "name_ur": "ریڈ بل",
+                "description": "Red Bull energy drink 8.4oz",
+                "category": "energy_drinks",
+                "price": 2.99,
+                "wholesale_price": 1.89,
+                "unit": "can",
+                "stock": 250,
                 "is_available": True,
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()

@@ -20,10 +20,9 @@ import { useTranslation } from '../../src/hooks/useTranslation';
 import { getProducts, createProduct, deleteProduct } from '../../src/utils/api';
 
 const CATEGORIES = [
-  { id: 'bakery', name: 'Bakery' },
-  { id: 'cakes_sweets', name: 'Cakes & Sweets' },
-  { id: 'premium_snacks', name: 'Premium Snacks' },
-  { id: 'energy_beverages', name: 'Energy & Beverages' }
+  { id: 'cakes_pastry', name: 'Cakes, Donuts & Pastry' },
+  { id: 'nuts_seeds', name: 'Nuts, Seeds & Trail Mix' },
+  { id: 'energy_drinks', name: 'Energy Drinks' }
 ];
 
 export default function AdminProductsScreen() {

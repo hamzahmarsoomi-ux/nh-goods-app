@@ -85,20 +85,18 @@ export default function HomeScreen() {
 
   const getCategoryIcon = (id: string) => {
     switch (id) {
-      case 'bakery': return 'pizza-outline';
-      case 'cakes_sweets': return 'ice-cream-outline';
-      case 'premium_snacks': return 'fast-food-outline';
-      case 'energy_beverages': return 'cafe-outline';
+      case 'cakes_pastry': return 'ice-cream-outline';
+      case 'nuts_seeds': return 'nutrition-outline';
+      case 'energy_drinks': return 'flash-outline';
       default: return 'cube-outline';
     }
   };
 
   const getCategoryColor = (id: string) => {
     switch (id) {
-      case 'bakery': return COLORS.bakery;
-      case 'cakes_sweets': return COLORS.cakesSweets;
-      case 'premium_snacks': return COLORS.premiumSnacks;
-      case 'energy_beverages': return COLORS.energyBeverages;
+      case 'cakes_pastry': return COLORS.cakesSweets;
+      case 'nuts_seeds': return COLORS.premiumSnacks;
+      case 'energy_drinks': return COLORS.energyBeverages;
       default: return COLORS.royalGold;
     }
   };
