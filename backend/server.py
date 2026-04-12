@@ -1000,6 +1000,33 @@ async def create_inquiry(data: InquiryCreate, current_user: dict = Depends(get_c
     }
     await db.inquiries.insert_one(inquiry)
     await log_activity(current_user["id"], current_user["name"], "snap_ask", {"type": data.inquiry_type})
+    
+    # Also send as a message to admin chat
+    inquiry_labels = {"availability": "Is this item in stock?", "pricing": "What is the wholesale price?", "request": "Can you source this product?"}
+    inquiry_text = f"📸 Snap & Ask: {inquiry_labels.get(data.inquiry_type, data.inquiry_type)}"
+    if data.message:
+        inquiry_text += f"\n💬 {data.message}"
+    
+    # Find admin user
+    admin_user = await db.users.find_one({"is_admin": True})
+    if admin_user:
+        admin_id = admin_user["id"] if "id" in admin_user else str(admin_user["_id"])
+        conv_id = f"conv_{min(current_user['id'], admin_id)}_{max(current_user['id'], admin_id)}"
+        
+        # Create message with image
+        msg = {
+            "id": str(uuid.uuid4()),
+            "conversation_id": conv_id,
+            "sender_id": current_user["id"],
+            "sender_name": current_user["name"],
+            "recipient_id": admin_id,
+            "text": inquiry_text,
+            "image_base64": data.image_base64,
+            "is_read": False,
+            "created_at": datetime.utcnow()
+        }
+        await db.messages.insert_one(msg)
+    
     return {"id": inquiry["id"], "message": "Inquiry sent successfully"}
 
 @api_router.get("/inquiries")
