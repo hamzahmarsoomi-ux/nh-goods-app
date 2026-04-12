@@ -2,6 +2,7 @@
   "expo": {
     "name": "NH GOODS",
     "slug": "nh-goods",
+    "owner": "hm97za",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
