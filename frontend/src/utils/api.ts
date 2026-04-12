@@ -85,6 +85,9 @@ export const getCustomerPresence = () => api.get('/admin/customer-presence');
 
 export const getFlashDeals = () => api.get('/flash-deals');
 
+export const toggleFlashDeal = (productId: string) =>
+  api.put(`/admin/products/${productId}/toggle-deal`);
+
 export const getLastOrder = () => api.get('/last-order');
 
 export const reorder = (orderId: string) => api.post(`/reorder/${orderId}`);

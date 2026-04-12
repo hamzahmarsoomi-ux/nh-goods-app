@@ -45,6 +45,14 @@ export default function AdminDashboard() {
       route: '/admin/orders'
     },
     {
+      id: 'deals',
+      title: "Today's Deals",
+      subtitle: 'Add or remove flash deals',
+      icon: 'flash',
+      color: COLORS.warning,
+      route: '/admin/deals'
+    },
+    {
       id: 'products',
       title: t('manageProducts'),
       subtitle: 'Add or update inventory',

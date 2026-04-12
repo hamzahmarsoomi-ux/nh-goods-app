@@ -497,6 +497,25 @@ async def get_flash_deals(current_user: dict = Depends(get_current_user)):
     
     return result
 
+@api_router.put("/admin/products/{product_id}/toggle-deal")
+async def toggle_flash_deal(product_id: str, current_user: dict = Depends(get_current_user)):
+    if not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    product = await db.products.find_one({"id": product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    new_status = not product.get("is_flash_deal", False)
+    deal_price = product.get("wholesale_price", product["price"]) * 0.8 if new_status else None
+    
+    await db.products.update_one(
+        {"id": product_id},
+        {"$set": {"is_flash_deal": new_status, "flash_deal_price": deal_price}}
+    )
+    
+    return {"is_flash_deal": new_status, "flash_deal_price": deal_price}
+
 @api_router.get("/last-order")
 async def get_last_order(current_user: dict = Depends(get_current_user)):
     """Get the user's last successful order for quick reorder"""
