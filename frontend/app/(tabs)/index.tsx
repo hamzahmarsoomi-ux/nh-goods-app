@@ -6,7 +6,6 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  Linking,
   RefreshControl,
   Alert
 } from 'react-native';
@@ -18,8 +17,6 @@ import { useTranslation } from '../../src/hooks/useTranslation';
 import { useAuthStore } from '../../src/store/authStore';
 import { useCartStore } from '../../src/store/cartStore';
 import { getCategories, getProducts, getFlashDeals, getLastOrder, reorder } from '../../src/utils/api';
-
-const WHATSAPP_NUMBER = '+16034611441';
 
 export default function HomeScreen() {
   const { t, rtl, language } = useTranslation();
@@ -83,13 +80,6 @@ export default function HomeScreen() {
       product_id: product.id,
       name: product.name,
       price: product.flash_deal_price || product.wholesale_price || product.price
-    });
-  };
-
-  const openWhatsApp = () => {
-    const url = `whatsapp://send?phone=${WHATSAPP_NUMBER}`;
-    Linking.openURL(url).catch(() => {
-      Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER.replace('+', '')}`);
     });
   };
 
@@ -286,16 +276,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* WhatsApp Contact */}
-        <Pressable testID="whatsapp-btn" style={styles.whatsappButton} onPress={openWhatsApp}>
-          <Ionicons name="logo-whatsapp" size={24} color={COLORS.white} />
-          <View style={styles.whatsappTextContainer}>
-            <Text style={styles.whatsappTitle}>{t('directLine')}</Text>
-            <Text style={styles.whatsappSubtitle}>{t('contactWhatsApp')}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.white} />
-        </Pressable>
-
         <View style={{ height: 20 }} />
       </ScrollView>
     </SafeAreaView>
@@ -450,15 +430,5 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md, padding: SPACING.lg,
     alignItems: 'center', gap: SPACING.sm, ...SHADOWS.small
   },
-  actionText: { color: COLORS.textPrimary, fontSize: FONTS.sizes.sm },
-
-  // WhatsApp
-  whatsappButton: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#25D366', marginHorizontal: SPACING.xl,
-    padding: SPACING.lg, borderRadius: BORDER_RADIUS.md, gap: SPACING.md
-  },
-  whatsappTextContainer: { flex: 1 },
-  whatsappTitle: { color: COLORS.white, fontSize: FONTS.sizes.md, fontWeight: 'bold' },
-  whatsappSubtitle: { color: COLORS.white, fontSize: FONTS.sizes.sm, opacity: 0.9 }
+  actionText: { color: COLORS.textPrimary, fontSize: FONTS.sizes.sm }
 });

@@ -32,7 +32,8 @@ export default function AdminUsersScreen() {
     shop_name: '',
     shop_address: '',
     shop_latitude: '',
-    shop_longitude: ''
+    shop_longitude: '',
+    ein_number: ''
   });
   const [isCreating, setIsCreating] = useState(false);
   
@@ -71,7 +72,7 @@ export default function AdminUsersScreen() {
         shop_longitude: newUser.shop_longitude ? parseFloat(newUser.shop_longitude) : undefined
       });
       setShowAddModal(false);
-      setNewUser({ phone_number: '', pin: '', name: '', shop_name: '', shop_address: '', shop_latitude: '', shop_longitude: '' });
+      setNewUser({ phone_number: '', pin: '', name: '', shop_name: '', shop_address: '', shop_latitude: '', shop_longitude: '', ein_number: '' });
       loadUsers();
       Alert.alert('Success', 'Customer created successfully');
     } catch (error: any) {
@@ -255,6 +256,14 @@ export default function AdminUsersScreen() {
               placeholderTextColor={COLORS.textMuted}
               value={newUser.shop_name}
               onChangeText={(text) => setNewUser({ ...newUser, shop_name: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="EIN Number (Tax ID) *"
+              placeholderTextColor={COLORS.textMuted}
+              value={newUser.ein_number}
+              onChangeText={(text) => setNewUser({ ...newUser, ein_number: text })}
+              keyboardType="number-pad"
             />
             <TextInput
               style={styles.input}

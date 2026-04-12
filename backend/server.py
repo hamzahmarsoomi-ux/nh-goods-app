@@ -53,6 +53,7 @@ class UserCreate(BaseModel):
     shop_address: Optional[str] = None
     shop_latitude: Optional[float] = None
     shop_longitude: Optional[float] = None
+    ein_number: Optional[str] = None
     language: str = "en"
     is_admin: bool = False
 
@@ -340,6 +341,7 @@ async def create_user(data: UserCreate, current_user: dict = Depends(get_current
         "shop_address": data.shop_address,
         "shop_latitude": data.shop_latitude,
         "shop_longitude": data.shop_longitude,
+        "ein_number": data.ein_number,
         "language": data.language,
         "is_admin": data.is_admin,
         "is_active": True,
