@@ -126,17 +126,10 @@ export default function CatalogScreen() {
         
         <View style={styles.priceRow}>
           <View>
-            <Text style={styles.wholesaleLabel}>{t('wholesalePrice')}</Text>
             <Text style={styles.wholesalePrice}>
               ${(item.wholesale_price || item.price).toFixed(2)}
             </Text>
           </View>
-          {item.price !== item.wholesale_price && (
-            <View>
-              <Text style={styles.retailLabel}>{t('retailPrice')}</Text>
-              <Text style={styles.retailPrice}>${item.price.toFixed(2)}</Text>
-            </View>
-          )}
         </View>
         
         <Pressable

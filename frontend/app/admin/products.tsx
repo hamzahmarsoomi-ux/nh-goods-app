@@ -150,12 +150,8 @@ export default function AdminProductsScreen() {
       
       <View style={styles.productFooter}>
         <View>
-          <Text style={styles.priceLabel}>Wholesale</Text>
+          <Text style={styles.priceLabel}>Price</Text>
           <Text style={styles.wholesalePrice}>${(item.wholesale_price || item.price).toFixed(2)}</Text>
-        </View>
-        <View>
-          <Text style={styles.priceLabel}>Retail</Text>
-          <Text style={styles.retailPrice}>${item.price.toFixed(2)}</Text>
         </View>
         <View>
           <Text style={styles.priceLabel}>Stock</Text>
