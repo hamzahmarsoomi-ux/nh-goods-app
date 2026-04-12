@@ -10,6 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.nhqualitygoods.nhgoods",
       "infoPlist": {
         "NSCameraUsageDescription": "Take photos of products to inquire about pricing",
         "NSPhotoLibraryUsageDescription": "Upload product photos for wholesale inquiries",
