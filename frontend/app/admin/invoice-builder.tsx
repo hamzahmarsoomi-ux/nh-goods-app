@@ -63,8 +63,8 @@ export default function InvoiceBuilderScreen() {
   const addItem = () => setItems([...items, { name: '', qty: '1', price: '' }]);
 
   const removeItem = (index: number) => {
-    if (items.length <= 1) return;
-    setItems(items.filter((_, i) => i !== index));
+    const newItems = items.filter((_, i) => i !== index);
+    setItems(newItems);
   };
 
   const updateItem = (index: number, field: keyof InvoiceItem, value: string) => {
@@ -73,14 +73,17 @@ export default function InvoiceBuilderScreen() {
     setItems(updated);
   };
 
-  const selectProduct = (product: any, index: number) => {
-    const updated = [...items];
-    updated[index] = {
-      name: product.name,
-      qty: '1',
-      price: (product.wholesale_price || product.price).toFixed(2)
-    };
-    setItems(updated);
+  const selectProduct = (product: any) => {
+    const price = (product.wholesale_price || product.price).toFixed(2);
+    // Check if product already in list
+    const existingIndex = items.findIndex(i => i.name === product.name);
+    if (existingIndex >= 0) {
+      const updated = [...items];
+      updated[existingIndex].qty = String((parseInt(updated[existingIndex].qty) || 0) + 1);
+      setItems(updated);
+    } else {
+      setItems([...items.filter(i => i.name !== ''), { name: product.name, qty: '1', price }]);
+    }
     setShowProductPicker(false);
   };
 
@@ -225,51 +228,44 @@ export default function InvoiceBuilderScreen() {
         <View style={s.field}>
           <View style={s.itemsHeader}>
             <Text style={s.label}>Items</Text>
-            <Pressable style={s.addItemBtn} onPress={addItem}>
+            <Pressable style={s.addItemBtn} onPress={() => setShowProductPicker(true)}>
               <Ionicons name="add" size={18} color={COLORS.deepNavy} />
-              <Text style={s.addItemText}>Add Item</Text>
+              <Text style={s.addItemText}>Add from List</Text>
             </Pressable>
           </View>
+
+          {items.length === 0 && (
+            <Pressable style={s.emptyItems} onPress={() => setShowProductPicker(true)}>
+              <Ionicons name="cart-outline" size={36} color={COLORS.textMuted} />
+              <Text style={s.emptyItemsText}>Tap to add products</Text>
+            </Pressable>
+          )}
 
           {items.map((item, index) => (
             <View key={index} style={s.itemRow}>
               <View style={s.itemNameRow}>
-                <TextInput
-                  style={[s.input, s.itemNameInput]}
-                  placeholder="Product name"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={item.name}
-                  onChangeText={(v) => updateItem(index, 'name', v)}
-                />
-                <Pressable style={s.pickProductBtn} onPress={() => { setActiveItemIndex(index); setShowProductPicker(true); }}>
-                  <Ionicons name="list" size={18} color={COLORS.royalGold} />
+                <Text style={s.itemNameText} numberOfLines={1}>{item.name}</Text>
+                <Pressable style={s.removeItemBtn} onPress={() => removeItem(index)}>
+                  <Ionicons name="close-circle" size={22} color={COLORS.error} />
                 </Pressable>
               </View>
               <View style={s.itemDetailsRow}>
-                <TextInput
-                  style={[s.input, s.qtyInput]}
-                  placeholder="Qty"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={item.qty}
-                  onChangeText={(v) => updateItem(index, 'qty', v)}
-                  keyboardType="number-pad"
-                />
-                <TextInput
-                  style={[s.input, s.priceInput]}
-                  placeholder="Price"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={item.price}
-                  onChangeText={(v) => updateItem(index, 'price', v)}
-                  keyboardType="decimal-pad"
-                />
+                <View style={s.qtyWrap}>
+                  <Pressable style={s.qtyBtn} onPress={() => { const q = Math.max(1, (parseInt(item.qty) || 1) - 1); updateItem(index, 'qty', String(q)); }}>
+                    <Ionicons name="remove" size={16} color={COLORS.textPrimary} />
+                  </Pressable>
+                  <TextInput style={s.qtyInput} value={item.qty} onChangeText={(v) => updateItem(index, 'qty', v)} keyboardType="number-pad" />
+                  <Pressable style={s.qtyBtn} onPress={() => { const q = (parseInt(item.qty) || 0) + 1; updateItem(index, 'qty', String(q)); }}>
+                    <Ionicons name="add" size={16} color={COLORS.textPrimary} />
+                  </Pressable>
+                </View>
+                <Text style={s.itemPriceLabel}>× ${parseFloat(item.price).toFixed(2)}</Text>
                 <Text style={s.itemTotal}>
                   ${((parseFloat(item.qty) || 0) * (parseFloat(item.price) || 0)).toFixed(2)}
                 </Text>
-                {items.length > 1 && (
-                  <Pressable style={s.removeItemBtn} onPress={() => removeItem(index)}>
-                    <Ionicons name="close-circle" size={22} color={COLORS.error} />
-                  </Pressable>
-                )}
+              </View>
+            </View>
+          ))}
               </View>
             </View>
           ))}
@@ -326,8 +322,11 @@ export default function InvoiceBuilderScreen() {
               <Pressable onPress={() => setShowProductPicker(false)}><Ionicons name="close" size={24} color={COLORS.textPrimary} /></Pressable>
             </View>
             <FlatList data={products} keyExtractor={(p) => p.id} renderItem={({ item }) => (
-              <Pressable style={s.modalItem} onPress={() => selectProduct(item, activeItemIndex)}>
-                <Text style={s.modalItemName}>{item.name}</Text>
+              <Pressable style={s.modalItem} onPress={() => selectProduct(item)}>
+                <View style={s.modalItemLeft}>
+                  <Text style={s.modalItemName}>{item.name}</Text>
+                  {item.description && <Text style={s.modalItemDesc}>{item.description}</Text>}
+                </View>
                 <Text style={s.modalItemPrice}>${(item.wholesale_price || item.price).toFixed(2)}</Text>
               </Pressable>
             )} />
@@ -356,15 +355,18 @@ const s = StyleSheet.create({
   itemsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm },
   addItemBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.royalGold, paddingVertical: SPACING.xs, paddingHorizontal: SPACING.md, borderRadius: BORDER_RADIUS.sm },
   addItemText: { fontSize: FONTS.sizes.xs, fontWeight: 'bold', color: COLORS.deepNavy },
+  emptyItems: { alignItems: 'center', padding: SPACING.xxl, backgroundColor: COLORS.cardBackground, borderRadius: BORDER_RADIUS.lg, borderWidth: 2, borderColor: COLORS.border, borderStyle: 'dashed' },
+  emptyItemsText: { color: COLORS.textMuted, marginTop: SPACING.sm },
   itemRow: { backgroundColor: COLORS.cardBackground, borderRadius: BORDER_RADIUS.md, padding: SPACING.md, marginBottom: SPACING.sm },
-  itemNameRow: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.sm },
-  itemNameInput: { flex: 1 },
-  pickProductBtn: { backgroundColor: COLORS.inputBackground, borderRadius: BORDER_RADIUS.sm, padding: SPACING.md, justifyContent: 'center' },
-  itemDetailsRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-  qtyInput: { width: 60, textAlign: 'center' },
-  priceInput: { width: 80, textAlign: 'center' },
-  itemTotal: { flex: 1, fontSize: FONTS.sizes.md, fontWeight: 'bold', color: COLORS.royalGold, textAlign: 'right' },
+  itemNameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.sm },
+  itemNameText: { flex: 1, fontSize: FONTS.sizes.md, fontWeight: '600', color: COLORS.textPrimary },
   removeItemBtn: { padding: 4 },
+  itemDetailsRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.inputBackground, borderRadius: BORDER_RADIUS.sm },
+  qtyBtn: { padding: SPACING.sm },
+  qtyInput: { width: 40, textAlign: 'center', fontSize: FONTS.sizes.md, color: COLORS.textPrimary, fontWeight: 'bold' },
+  itemPriceLabel: { fontSize: FONTS.sizes.sm, color: COLORS.textSecondary },
+  itemTotal: { flex: 1, fontSize: FONTS.sizes.md, fontWeight: 'bold', color: COLORS.royalGold, textAlign: 'right' },
   noteInput: { minHeight: 70, textAlignVertical: 'top' },
   totalCard: { backgroundColor: COLORS.cardBackground, borderRadius: BORDER_RADIUS.lg, padding: SPACING.xl, alignItems: 'center', marginBottom: SPACING.lg, borderWidth: 1, borderColor: COLORS.royalGold + '40' },
   totalLabel: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted },
@@ -377,7 +379,9 @@ const s = StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.lg },
   modalTitle: { fontSize: FONTS.sizes.xl, fontWeight: 'bold', color: COLORS.textPrimary },
   modalItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: SPACING.lg, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  modalItemLeft: { flex: 1 },
   modalItemName: { fontSize: FONTS.sizes.md, color: COLORS.textPrimary },
+  modalItemDesc: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted, marginTop: 2 },
   modalItemSub: { fontSize: FONTS.sizes.xs, color: COLORS.royalGold, marginTop: 2 },
   modalItemPrice: { fontSize: FONTS.sizes.md, fontWeight: 'bold', color: COLORS.royalGold }
 });
