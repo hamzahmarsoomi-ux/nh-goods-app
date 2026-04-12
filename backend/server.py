@@ -20,7 +20,7 @@ load_dotenv(ROOT_DIR / '.env')
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ.get('DB_NAME', 'nh_goods_db')]
+db = client[os.environ['DB_NAME']]
 
 # JWT Settings
 JWT_SECRET = os.environ.get('JWT_SECRET', 'nh_goods_super_secret_key_2025')
@@ -362,7 +362,7 @@ async def get_all_users(current_user: dict = Depends(get_current_user)):
     if not current_user.get("is_admin"):
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    users = await db.users.find().to_list(1000)
+    users = await db.users.find({}, {"_id": 0, "pin_hash": 0}).limit(200).to_list(200)
     return [{
         "id": u["id"],
         "phone_number": u["phone_number"],
@@ -775,7 +775,10 @@ async def get_customer_presence(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     # Get all non-admin users with their location data
-    users = await db.users.find({"is_admin": {"$ne": True}}).to_list(1000)
+    users = await db.users.find(
+        {"is_admin": {"$ne": True}},
+        {"_id": 0, "pin_hash": 0}
+    ).limit(200).to_list(200)
     
     presence_list = []
     for user in users:
@@ -919,24 +922,41 @@ async def get_conversations(current_user: dict = Depends(get_current_user)):
     # Get all messages involving this user
     msgs = await db.messages.find({
         "$or": [{"sender_id": my_id}, {"receiver_id": my_id}]
-    }).sort("created_at", -1).to_list(1000)
+    }, {"_id": 0, "file_base64": 0}).sort("created_at", -1).limit(500).to_list(500)
+    
+    # Collect unique partner IDs
+    partner_ids = list(set(
+        m["receiver_id"] if m["sender_id"] == my_id else m["sender_id"]
+        for m in msgs
+    ))
+    
+    # Batch fetch all partners
+    partners_list = await db.users.find(
+        {"id": {"$in": partner_ids}},
+        {"_id": 0, "id": 1, "name": 1, "shop_name": 1}
+    ).to_list(len(partner_ids))
+    partners_dict = {p["id"]: p for p in partners_list}
+    
+    # Count unread per partner
+    unread_counts = {}
+    for pid in partner_ids:
+        unread_counts[pid] = await db.messages.count_documents(
+            {"sender_id": pid, "receiver_id": my_id, "read": False}
+        )
     
     # Group by conversation partner
     conversations = {}
     for m in msgs:
         partner_id = m["receiver_id"] if m["sender_id"] == my_id else m["sender_id"]
         if partner_id not in conversations:
-            partner = await db.users.find_one({"id": partner_id})
-            unread = await db.messages.count_documents(
-                {"sender_id": partner_id, "receiver_id": my_id, "read": False}
-            )
+            partner = partners_dict.get(partner_id, {})
             conversations[partner_id] = {
                 "partner_id": partner_id,
-                "partner_name": partner["name"] if partner else "Unknown",
-                "partner_shop": partner.get("shop_name") if partner else None,
+                "partner_name": partner.get("name", "Unknown"),
+                "partner_shop": partner.get("shop_name"),
                 "last_message": m.get("text") or f"[{m.get('file_type', 'file')}]",
                 "last_time": m["created_at"],
-                "unread": unread
+                "unread": unread_counts.get(partner_id, 0)
             }
     
     return list(conversations.values())
