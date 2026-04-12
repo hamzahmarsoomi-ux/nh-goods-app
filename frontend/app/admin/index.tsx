@@ -67,6 +67,14 @@ export default function AdminDashboard() {
       icon: 'analytics',
       color: COLORS.energyBeverages,
       route: '/admin/activity'
+    },
+    {
+      id: 'photo',
+      title: 'Photo Tool',
+      subtitle: 'Crop, rotate & enhance product photos',
+      icon: 'camera',
+      color: COLORS.royalGold,
+      route: '/photo-tool'
     }
   ];
   
