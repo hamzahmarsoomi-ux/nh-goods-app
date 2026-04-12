@@ -267,9 +267,9 @@ export default function HomeScreen() {
               <Ionicons name="chatbubbles-outline" size={24} color={COLORS.royalGold} />
               <Text style={styles.actionText}>Messages</Text>
             </Pressable>
-            <Pressable testID="marketplace-btn" style={styles.actionCard} onPress={() => router.push('/marketplace')}>
-              <Ionicons name="swap-horizontal" size={24} color={COLORS.success} />
-              <Text style={styles.actionText}>Neighbor Exchange</Text>
+            <Pressable testID="order-history-btn" style={styles.actionCard} onPress={() => router.push('/orders')}>
+              <Ionicons name="receipt-outline" size={24} color={COLORS.royalGold} />
+              <Text style={styles.actionText}>{t('orderHistory')}</Text>
             </Pressable>
           </View>
         </View>
