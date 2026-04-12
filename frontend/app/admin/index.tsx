@@ -53,14 +53,6 @@ export default function AdminDashboard() {
       route: '/admin/products'
     },
     {
-      id: 'voice',
-      title: t('voiceOrders'),
-      subtitle: 'Review voice order recordings',
-      icon: 'mic',
-      color: COLORS.cakesSweets,
-      route: '/admin/voice-orders'
-    },
-    {
       id: 'activity',
       title: t('activityLog'),
       subtitle: 'Monitor customer activity',
