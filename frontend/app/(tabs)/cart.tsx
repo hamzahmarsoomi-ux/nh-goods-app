@@ -111,7 +111,8 @@ export default function CartScreen() {
                 Make check payable to:{'\n'}
                 <Text style={s.checkCompanyName}>NH QUALITY GOODS LLC</Text>{'\n'}
                 Hamzah Marsoomi{'\n'}
-                Hooksett, NH{'\n\n'}
+                634 Montgomery St{'\n'}
+                Manchester, NH 03102{'\n\n'}
                 Take a clear photo of BOTH sides and send via Messages.
               </Text>
             </View>

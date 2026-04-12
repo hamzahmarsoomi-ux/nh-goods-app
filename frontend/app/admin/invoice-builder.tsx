@@ -159,7 +159,7 @@ export default function InvoiceBuilderScreen() {
             <div class="info-label">From</div>
             <div class="info-value">Hamzah Marsoomi</div>
             <div class="info-value" style="font-size:12px;color:#A0B4C8;">NH QUALITY GOODS LLC</div>
-            <div class="info-value" style="font-size:12px;color:#A0B4C8;">Hooksett, NH</div>
+            <div class="info-value" style="font-size:12px;color:#A0B4C8;">634 Montgomery St, Manchester, NH 03102</div>
             <div class="info-value" style="font-size:12px;color:#A0B4C8;">Phone: (603) 461-1441</div>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function InvoiceBuilderScreen() {
         <div class="footer">
           <div class="footer-text">Thank you for your business!</div>
           <div class="footer-brand">More than a supplier.. We are your growth partner.</div>
-          <div class="footer-text" style="margin-top:8px;">Hamzah Marsoomi | NH QUALITY GOODS LLC | Hooksett, NH | (603) 461-1441</div>
+          <div class="footer-text" style="margin-top:8px;">Hamzah Marsoomi | NH QUALITY GOODS LLC | 634 Montgomery St, Manchester, NH 03102 | (603) 461-1441</div>
         </div>
       </body></html>`;
 

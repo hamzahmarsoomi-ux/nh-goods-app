@@ -231,7 +231,7 @@ export default function ProfileScreen() {
         <View style={styles.footer}>
           <Text style={styles.footerCompany}>NH QUALITY GOODS LLC</Text>
           <Text style={styles.footerTagline}>Vision & Faith | الرؤية والإيمان</Text>
-          <Text style={styles.footerLocation}>Hooksett, NH</Text>
+          <Text style={styles.footerLocation}>634 Montgomery St, Manchester, NH 03102</Text>
         </View>
         
         {/* About Us */}
