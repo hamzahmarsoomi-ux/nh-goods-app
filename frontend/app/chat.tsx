@@ -135,9 +135,18 @@ export default function ChatScreen() {
           {item.text && !(item.file_type === 'image' && item.text === '📷 Image') && !(item.file_type === 'image' && item.text === '📷 Photo') && (
             <Text style={[s.msgText, mine && s.msgTextMine]}>{item.text}</Text>
           )}
-          <Text style={[s.msgTime, mine && s.msgTimeMine]}>
-            {format(new Date(item.created_at), 'h:mm a')}
-          </Text>
+          <View style={s.msgFooter}>
+            <Text style={[s.msgTime, mine && s.msgTimeMine]}>
+              {format(new Date(item.created_at), 'h:mm a')}
+            </Text>
+            {mine && user?.is_admin && (
+              <Ionicons
+                name={item.read ? 'checkmark-done' : 'checkmark'}
+                size={14}
+                color={item.read ? '#34B7F1' : (mine ? COLORS.deepNavy + '60' : COLORS.textMuted)}
+              />
+            )}
+          </View>
         </View>
       </View>
     );
@@ -236,8 +245,9 @@ const s = StyleSheet.create({
   bubbleOther: { backgroundColor: COLORS.cardBackground, borderBottomLeftRadius: 4 },
   msgText: { fontSize: FONTS.sizes.md, color: COLORS.textPrimary },
   msgTextMine: { color: COLORS.deepNavy },
-  msgTime: { fontSize: 10, color: COLORS.textMuted, marginTop: 4, alignSelf: 'flex-end' },
+  msgTime: { fontSize: 10, color: COLORS.textMuted, marginTop: 4 },
   msgTimeMine: { color: COLORS.deepNavy + '80' },
+  msgFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginTop: 4 },
   msgImage: { width: 200, height: 150, borderRadius: BORDER_RADIUS.md, marginBottom: SPACING.xs },
   pdfBubble: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, paddingVertical: SPACING.xs },
   pdfName: { fontSize: FONTS.sizes.sm, color: COLORS.textPrimary, flex: 1 },
