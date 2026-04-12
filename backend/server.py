@@ -21,7 +21,11 @@ load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
 mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-client = AsyncIOMotorClient(mongo_url)
+import certifi
+if 'mongodb+srv' in mongo_url or 'mongodb.net' in mongo_url:
+    client = AsyncIOMotorClient(mongo_url, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=10000)
+else:
+    client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ.get('DB_NAME', 'nh_goods_db')]
 
 # JWT Settings
