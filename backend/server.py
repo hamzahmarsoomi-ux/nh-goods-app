@@ -185,7 +185,14 @@ class MessageCreate(BaseModel):
     text: Optional[str] = None
     file_base64: Optional[str] = None
     file_name: Optional[str] = None
-    file_type: Optional[str] = None  # image, pdf, file
+    file_type: Optional[str] = None
+
+class MarketplaceCreate(BaseModel):
+    product_name: str
+    description: Optional[str] = None
+    price: float
+    quantity: int
+    image_base64: Optional[str] = None  # image, pdf, file
 
 class ActivityLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -685,6 +692,48 @@ class ActivityLogCreate(BaseModel):
 async def create_activity_log(data: ActivityLogCreate, current_user: dict = Depends(get_current_user)):
     await log_activity(current_user["id"], current_user["name"], data.action, data.details)
     return {"message": "Logged"}
+
+# ==================== MARKETPLACE (Neighbor Exchange) ====================
+
+@api_router.post("/marketplace")
+async def create_listing(data: MarketplaceCreate, current_user: dict = Depends(get_current_user)):
+    listing = {
+        "id": str(uuid.uuid4()),
+        "seller_id": current_user["id"],
+        "seller_name": current_user["name"],
+        "seller_phone": current_user["phone_number"],
+        "shop_name": current_user.get("shop_name"),
+        "product_name": data.product_name,
+        "description": data.description,
+        "price": data.price,
+        "quantity": data.quantity,
+        "image_base64": data.image_base64,
+        "status": "active",
+        "created_at": datetime.utcnow()
+    }
+    await db.marketplace.insert_one(listing)
+    return {"id": listing["id"], "message": "Listed successfully"}
+
+@api_router.get("/marketplace")
+async def get_listings(current_user: dict = Depends(get_current_user)):
+    listings = await db.marketplace.find({"status": "active"}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
+    return listings
+
+@api_router.get("/marketplace/mine")
+async def get_my_listings(current_user: dict = Depends(get_current_user)):
+    listings = await db.marketplace.find({"seller_id": current_user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    return listings
+
+@api_router.delete("/marketplace/{listing_id}")
+async def delete_listing(listing_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.marketplace.delete_one({"id": listing_id, "seller_id": current_user["id"]})
+    if result.deleted_count == 0:
+        # Admin can delete any
+        if current_user.get("is_admin"):
+            await db.marketplace.delete_one({"id": listing_id})
+        else:
+            raise HTTPException(status_code=404, detail="Listing not found")
+    return {"message": "Deleted"}
 
 @api_router.get("/categories")
 async def get_categories():

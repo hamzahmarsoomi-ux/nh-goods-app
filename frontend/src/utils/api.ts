@@ -107,3 +107,10 @@ export const sendMessage = (data: { receiver_id: string; text?: string; file_bas
 export const getConversation = (userId: string) => api.get(`/messages/${userId}`);
 
 export const getConversations = () => api.get('/messages');
+
+// Marketplace
+export const createListing = (data: { product_name: string; description?: string; price: number; quantity: number; image_base64?: string }) =>
+  api.post('/marketplace', data);
+export const getListings = () => api.get('/marketplace');
+export const getMyListings = () => api.get('/marketplace/mine');
+export const deleteListing = (id: string) => api.delete(`/marketplace/${id}`);
