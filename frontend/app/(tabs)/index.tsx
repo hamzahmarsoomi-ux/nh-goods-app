@@ -275,13 +275,13 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionsGrid}>
+            <Pressable testID="messages-btn" style={styles.actionCard} onPress={() => router.push('/messages')}>
+              <Ionicons name="chatbubbles-outline" size={24} color={COLORS.royalGold} />
+              <Text style={styles.actionText}>Messages</Text>
+            </Pressable>
             <Pressable testID="order-history-btn" style={styles.actionCard} onPress={() => router.push('/orders')}>
               <Ionicons name="receipt-outline" size={24} color={COLORS.royalGold} />
               <Text style={styles.actionText}>{t('orderHistory')}</Text>
-            </Pressable>
-            <Pressable testID="invoices-btn" style={styles.actionCard} onPress={() => router.push('/profile')}>
-              <Ionicons name="document-text-outline" size={24} color={COLORS.royalGold} />
-              <Text style={styles.actionText}>{t('invoices')}</Text>
             </Pressable>
           </View>
         </View>

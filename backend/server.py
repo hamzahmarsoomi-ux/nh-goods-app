@@ -176,6 +176,13 @@ class InquiryCreate(BaseModel):
 class InquiryReply(BaseModel):
     reply: str
 
+class MessageCreate(BaseModel):
+    receiver_id: str
+    text: Optional[str] = None
+    file_base64: Optional[str] = None
+    file_name: Optional[str] = None
+    file_type: Optional[str] = None  # image, pdf, file
+
 class ActivityLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
@@ -866,6 +873,73 @@ async def reply_inquiry(inquiry_id: str, data: InquiryReply, current_user: dict 
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Inquiry not found")
     return {"message": "Reply sent"}
+
+# ==================== MESSAGING ROUTES ====================
+
+@api_router.post("/messages")
+async def send_message(data: MessageCreate, current_user: dict = Depends(get_current_user)):
+    msg = {
+        "id": str(uuid.uuid4()),
+        "sender_id": current_user["id"],
+        "sender_name": current_user["name"],
+        "sender_is_admin": current_user.get("is_admin", False),
+        "receiver_id": data.receiver_id,
+        "text": data.text,
+        "file_base64": data.file_base64,
+        "file_name": data.file_name,
+        "file_type": data.file_type,
+        "read": False,
+        "created_at": datetime.utcnow()
+    }
+    await db.messages.insert_one(msg)
+    return {"id": msg["id"], "message": "Message sent"}
+
+@api_router.get("/messages/{user_id}")
+async def get_conversation(user_id: str, current_user: dict = Depends(get_current_user)):
+    my_id = current_user["id"]
+    msgs = await db.messages.find({
+        "$or": [
+            {"sender_id": my_id, "receiver_id": user_id},
+            {"sender_id": user_id, "receiver_id": my_id}
+        ]
+    }).sort("created_at", 1).to_list(500)
+    
+    # Mark received messages as read
+    await db.messages.update_many(
+        {"sender_id": user_id, "receiver_id": my_id, "read": False},
+        {"$set": {"read": True}}
+    )
+    
+    return [{k: v for k, v in m.items() if k != '_id'} for m in msgs]
+
+@api_router.get("/messages")
+async def get_conversations(current_user: dict = Depends(get_current_user)):
+    my_id = current_user["id"]
+    
+    # Get all messages involving this user
+    msgs = await db.messages.find({
+        "$or": [{"sender_id": my_id}, {"receiver_id": my_id}]
+    }).sort("created_at", -1).to_list(1000)
+    
+    # Group by conversation partner
+    conversations = {}
+    for m in msgs:
+        partner_id = m["receiver_id"] if m["sender_id"] == my_id else m["sender_id"]
+        if partner_id not in conversations:
+            partner = await db.users.find_one({"id": partner_id})
+            unread = await db.messages.count_documents(
+                {"sender_id": partner_id, "receiver_id": my_id, "read": False}
+            )
+            conversations[partner_id] = {
+                "partner_id": partner_id,
+                "partner_name": partner["name"] if partner else "Unknown",
+                "partner_shop": partner.get("shop_name") if partner else None,
+                "last_message": m.get("text") or f"[{m.get('file_type', 'file')}]",
+                "last_time": m["created_at"],
+                "unread": unread
+            }
+    
+    return list(conversations.values())
 
 # ==================== SEED DATA ====================
 

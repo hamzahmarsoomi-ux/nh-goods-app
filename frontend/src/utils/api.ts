@@ -96,3 +96,11 @@ export const getInquiries = () => api.get('/inquiries');
 
 export const replyInquiry = (id: string, reply: string) =>
   api.put(`/admin/inquiries/${id}/reply`, { reply });
+
+// Messaging
+export const sendMessage = (data: { receiver_id: string; text?: string; file_base64?: string; file_name?: string; file_type?: string }) =>
+  api.post('/messages', data);
+
+export const getConversation = (userId: string) => api.get(`/messages/${userId}`);
+
+export const getConversations = () => api.get('/messages');
