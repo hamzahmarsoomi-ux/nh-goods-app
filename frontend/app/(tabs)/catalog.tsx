@@ -15,12 +15,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../src/utils/theme';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { useCartStore } from '../../src/store/cartStore';
+import { useAuthStore } from '../../src/store/authStore';
 import { getProducts, getCategories } from '../../src/utils/api';
 
 export default function CatalogScreen() {
   const { t, rtl, language } = useTranslation();
   const params = useLocalSearchParams<{ category?: string }>();
   const addItem = useCartStore((state) => state.addItem);
+  const user = useAuthStore((state) => state.user);
+  const canSeePrices = user?.can_see_prices !== false;
   
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -126,20 +129,31 @@ export default function CatalogScreen() {
         
         <View style={styles.priceRow}>
           <View>
-            <Text style={styles.wholesalePrice}>
-              ${(item.wholesale_price || item.price).toFixed(2)}
-            </Text>
+            {canSeePrices ? (
+              <Text style={styles.wholesalePrice}>
+                ${(item.wholesale_price || item.price).toFixed(2)}
+              </Text>
+            ) : (
+              <Text style={styles.contactPrice}>Contact for price</Text>
+            )}
           </View>
         </View>
         
-        <Pressable
-          style={[styles.addButton, item.stock === 0 && styles.addButtonDisabled]}
-          onPress={() => handleAddToCart(item)}
-          disabled={item.stock === 0}
-        >
-          <Ionicons name="cart-outline" size={18} color={COLORS.deepNavy} />
-          <Text style={styles.addButtonText}>{t('addToCart')}</Text>
-        </Pressable>
+        {canSeePrices ? (
+          <Pressable
+            style={[styles.addButton, item.stock === 0 && styles.addButtonDisabled]}
+            onPress={() => handleAddToCart(item)}
+            disabled={item.stock === 0}
+          >
+            <Ionicons name="cart-outline" size={18} color={COLORS.deepNavy} />
+            <Text style={styles.addButtonText}>{t('addToCart')}</Text>
+          </Pressable>
+        ) : (
+          <View style={styles.viewOnlyBadge}>
+            <Ionicons name="eye-outline" size={14} color={COLORS.textMuted} />
+            <Text style={styles.viewOnlyText}>View Only</Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -413,5 +427,23 @@ const styles = StyleSheet.create({
   },
   rtlText: {
     textAlign: 'right'
+  },
+  contactPrice: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.sm,
+    fontStyle: 'italic'
+  },
+  viewOnlyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.inputBackground,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
+    gap: SPACING.xs
+  },
+  viewOnlyText: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.xs
   }
 });

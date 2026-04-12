@@ -15,6 +15,7 @@ interface User {
   shop_longitude?: number;
   language: Language;
   is_admin: boolean;
+  can_see_prices: boolean;
 }
 
 interface AuthState {

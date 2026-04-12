@@ -69,7 +69,8 @@ export default function AdminUsersScreen() {
       await createUser({
         ...newUser,
         shop_latitude: newUser.shop_latitude ? parseFloat(newUser.shop_latitude) : undefined,
-        shop_longitude: newUser.shop_longitude ? parseFloat(newUser.shop_longitude) : undefined
+        shop_longitude: newUser.shop_longitude ? parseFloat(newUser.shop_longitude) : undefined,
+        can_see_prices: newUser.can_see_prices !== false
       });
       setShowAddModal(false);
       setNewUser({ phone_number: '', pin: '', name: '', shop_name: '', shop_address: '', shop_latitude: '', shop_longitude: '', ein_number: '' });
@@ -293,6 +294,16 @@ export default function AdminUsersScreen() {
               />
             </View>
             <Text style={styles.gpsHint}>Find coordinates from Google Maps</Text>
+            
+            <Pressable
+              style={styles.toggleRow}
+              onPress={() => setNewUser({ ...newUser, can_see_prices: newUser.can_see_prices === false ? true : false })}
+            >
+              <View style={[styles.toggleBox, newUser.can_see_prices !== false && styles.toggleBoxActive]}>
+                {newUser.can_see_prices !== false && <Ionicons name="checkmark" size={16} color={COLORS.deepNavy} />}
+              </View>
+              <Text style={styles.toggleLabel}>Can See Prices</Text>
+            </Pressable>
             
             <Pressable
               style={[styles.createButton, isCreating && styles.createButtonDisabled]}
@@ -520,5 +531,31 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     marginBottom: SPACING.md,
     marginTop: -SPACING.sm
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginBottom: SPACING.lg,
+    padding: SPACING.md,
+    backgroundColor: COLORS.inputBackground,
+    borderRadius: BORDER_RADIUS.md
+  },
+  toggleBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  toggleBoxActive: {
+    backgroundColor: COLORS.royalGold,
+    borderColor: COLORS.royalGold
+  },
+  toggleLabel: {
+    color: COLORS.textPrimary,
+    fontSize: FONTS.sizes.md
   }
 });

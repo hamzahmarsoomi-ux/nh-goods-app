@@ -54,6 +54,7 @@ class UserCreate(BaseModel):
     shop_latitude: Optional[float] = None
     shop_longitude: Optional[float] = None
     ein_number: Optional[str] = None
+    can_see_prices: bool = True
     language: str = "en"
     is_admin: bool = False
 
@@ -284,7 +285,8 @@ async def login(data: UserLogin):
             "shop_latitude": user.get("shop_latitude"),
             "shop_longitude": user.get("shop_longitude"),
             "language": user.get("language", "en"),
-            "is_admin": user.get("is_admin", False)
+            "is_admin": user.get("is_admin", False),
+            "can_see_prices": user.get("can_see_prices", True)
         }
     }
 
@@ -342,6 +344,7 @@ async def create_user(data: UserCreate, current_user: dict = Depends(get_current
         "shop_latitude": data.shop_latitude,
         "shop_longitude": data.shop_longitude,
         "ein_number": data.ein_number,
+        "can_see_prices": data.can_see_prices,
         "language": data.language,
         "is_admin": data.is_admin,
         "is_active": True,
