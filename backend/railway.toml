@@ -3,6 +3,6 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "PORT=${PORT:-8001} && uvicorn server:app --host 0.0.0.0 --port $PORT"
+startCommand = "uvicorn server:app --host 0.0.0.0 --port 8001"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
