@@ -266,9 +266,6 @@ export default function InvoiceBuilderScreen() {
               </View>
             </View>
           ))}
-              </View>
-            </View>
-          ))}
         </View>
 
         {/* Notes */}
