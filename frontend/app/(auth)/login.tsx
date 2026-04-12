@@ -155,13 +155,6 @@ export default function LoginScreen() {
               Private access only. Contact admin for account creation.
             </Text>
           </View>
-          
-          {/* Demo Credentials */}
-          <View style={styles.demoContainer}>
-            <Text style={styles.demoTitle}>Demo Credentials:</Text>
-            <Text style={styles.demoText}>Admin: 19971997 / 181818</Text>
-            <Text style={styles.demoText}>Customer: 9876543210 / 5678</Text>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
