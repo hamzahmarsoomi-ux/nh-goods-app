@@ -874,13 +874,13 @@ async def seed_database():
     """Seed the database with initial data (admin account and sample products)"""
     
     # Check if admin already exists
-    admin = await db.users.find_one({"phone_number": "1234567890"})
+    admin = await db.users.find_one({"phone_number": "19971997"})
     if not admin:
         # Create admin user
         admin_user = {
             "id": str(uuid.uuid4()),
-            "phone_number": "1234567890",
-            "pin_hash": hash_pin("1234"),
+            "phone_number": "19971997",
+            "pin_hash": hash_pin("181818"),
             "name": "Admin",
             "shop_name": "NH GOODS HQ",
             "shop_address": "Hooksett, NH",
