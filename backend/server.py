@@ -598,8 +598,12 @@ async def update_product(
     if not current_user.get("is_admin"):
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    update_data = data.dict()
+    update_data = {k: v for k, v in data.dict().items() if v is not None}
     update_data["updated_at"] = datetime.utcnow()
+    
+    # If image_base64 is provided, clear image_url (new upload replaces old)
+    if data.image_base64:
+        update_data["image_url"] = None
     
     result = await db.products.update_one(
         {"id": product_id},
