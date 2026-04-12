@@ -1222,8 +1222,16 @@ async def shutdown_db_client():
 # Serve static web files (for Railway deployment)
 WEB_DIST = ROOT_DIR / "web_dist"
 if WEB_DIST.exists():
+    # Mount static assets FIRST (before catch-all)
+    if (WEB_DIST / "_expo").exists():
+        app.mount("/_expo", StaticFiles(directory=str(WEB_DIST / "_expo")), name="expo_static")
+    if (WEB_DIST / "assets").exists():
+        app.mount("/assets", StaticFiles(directory=str(WEB_DIST / "assets")), name="web_assets")
+
     @app.get("/{full_path:path}")
     async def serve_web(full_path: str):
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404)
         # Try exact file
         file_path = WEB_DIST / full_path
         if file_path.is_file():
@@ -1241,9 +1249,3 @@ if WEB_DIST.exists():
         if root_index.is_file():
             return FileResponse(root_index)
         raise HTTPException(status_code=404)
-
-    # Mount static assets
-    if (WEB_DIST / "_expo").exists():
-        app.mount("/_expo", StaticFiles(directory=str(WEB_DIST / "_expo")), name="expo_static")
-    if (WEB_DIST / "assets").exists():
-        app.mount("/assets", StaticFiles(directory=str(WEB_DIST / "assets")), name="web_assets")
