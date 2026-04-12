@@ -123,34 +123,6 @@ export default function ProfileScreen() {
               </View>
             )}
           </View>
-          
-          {/* Location Status */}
-          <View style={styles.locationContainer}>
-            <View style={[
-              styles.locationBadge,
-              locationStatus === 'at_shop' && styles.locationAtShop,
-              locationStatus === 'away' && styles.locationAway,
-              locationStatus === 'disabled' && styles.locationDisabled
-            ]}>
-              <Ionicons
-                name={locationStatus === 'at_shop' ? 'location' : 'location-outline'}
-                size={14}
-                color={
-                  locationStatus === 'at_shop' ? COLORS.success :
-                  locationStatus === 'away' ? COLORS.warning : COLORS.textMuted
-                }
-              />
-              <Text style={[
-                styles.locationText,
-                locationStatus === 'at_shop' && styles.locationTextAtShop,
-                locationStatus === 'away' && styles.locationTextAway
-              ]}>
-                {locationStatus === 'checking' ? 'Checking...' :
-                 locationStatus === 'at_shop' ? t('atShop') :
-                 locationStatus === 'away' ? t('away') : 'Location disabled'}
-              </Text>
-            </View>
-          </View>
         </View>
         
         {/* Language Selector */}
