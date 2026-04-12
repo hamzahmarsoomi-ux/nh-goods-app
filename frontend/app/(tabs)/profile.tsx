@@ -240,6 +240,9 @@ export default function ProfileScreen() {
             <Ionicons name="business-outline" size={22} color={COLORS.royalGold} />
             <Text style={styles.aboutTitle}>About Us</Text>
           </View>
+          <Text style={styles.aboutText}>
+            More than a supplier.. We are your growth partner.
+          </Text>
           <View style={styles.aboutDivider} />
           <Text style={styles.aboutText}>
             NH Quality Goods LLC is your strategic sourcing and delivery partner. We bridge the gap between global manufacturers and your business, bringing world-class products directly to your doorstep.
