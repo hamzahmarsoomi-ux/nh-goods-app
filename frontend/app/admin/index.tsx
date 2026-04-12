@@ -62,8 +62,8 @@ export default function AdminDashboard() {
     },
     {
       id: 'activity',
-      title: t('activityLog'),
-      subtitle: 'Monitor customer activity',
+      title: 'Customer Analytics',
+      subtitle: 'Logins, cart behavior & activity',
       icon: 'analytics',
       color: COLORS.energyBeverages,
       route: '/admin/activity'

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../utils/api';
 
 interface CartItem {
   product_id: string;
@@ -8,6 +9,16 @@ interface CartItem {
   quantity: number;
   image_base64?: string;
 }
+
+const logCartAction = async (action: string, productId: string, productName: string) => {
+  try {
+    const token = await AsyncStorage.getItem('auth_token');
+    if (token) {
+      // Fire and forget - don't block cart operations
+      api.post('/activity-log', { action, details: { product_id: productId, product_name: productName } }).catch(() => {});
+    }
+  } catch {}
+};
 
 interface CartState {
   items: CartItem[];
@@ -37,14 +48,17 @@ export const useCartStore = create<CartState>((set, get) => ({
       }
       
       AsyncStorage.setItem('cart', JSON.stringify(newItems));
+      logCartAction('add_to_cart', item.product_id, item.name);
       return { items: newItems };
     });
   },
   
   removeItem: (productId) => {
     set((state) => {
+      const removedItem = state.items.find(i => i.product_id === productId);
       const newItems = state.items.filter(i => i.product_id !== productId);
       AsyncStorage.setItem('cart', JSON.stringify(newItems));
+      if (removedItem) logCartAction('remove_from_cart', productId, removedItem.name);
       return { items: newItems };
     });
   },

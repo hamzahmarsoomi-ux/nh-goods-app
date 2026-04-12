@@ -418,13 +418,64 @@ async def get_activity_logs(
     if not current_user.get("is_admin"):
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    logs = await db.activity_logs.find().sort("timestamp", -1).limit(limit).to_list(limit)
-    # Clean up ObjectId
-    result = []
-    for log in logs:
-        log_dict = {k: v for k, v in log.items() if k != '_id'}
-        result.append(log_dict)
-    return result
+    logs = await db.activity_logs.find({}, {"_id": 0}).sort("timestamp", -1).limit(limit).to_list(limit)
+    return logs
+
+@api_router.get("/admin/analytics-summary")
+async def get_analytics_summary(current_user: dict = Depends(get_current_user)):
+    if not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    users = await db.users.find({"is_admin": {"$ne": True}}, {"_id": 0, "pin_hash": 0}).limit(200).to_list(200)
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    summary = []
+    for u in users:
+        uid = u["id"]
+        login_count = await db.activity_logs.count_documents({"user_id": uid, "action": "login"})
+        today_logins = await db.activity_logs.count_documents({"user_id": uid, "action": "login", "timestamp": {"$gte": today_start}})
+        cart_add_count = await db.activity_logs.count_documents({"user_id": uid, "action": "add_to_cart"})
+        cart_remove_count = await db.activity_logs.count_documents({"user_id": uid, "action": "remove_from_cart"})
+        order_count = await db.orders.count_documents({"user_id": uid})
+        
+        summary.append({
+            "user_id": uid, "name": u["name"], "phone": u["phone_number"],
+            "shop_name": u.get("shop_name"), "total_logins": login_count,
+            "today_logins": today_logins, "cart_adds": cart_add_count,
+            "cart_removes": cart_remove_count, "total_orders": order_count
+        })
+    
+    summary.sort(key=lambda x: x["today_logins"], reverse=True)
+    return summary
+
+@api_router.get("/admin/user-analytics/{user_id}")
+async def get_user_analytics(user_id: str, current_user: dict = Depends(get_current_user)):
+    if not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "pin_hash": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    logs = await db.activity_logs.find({"user_id": user_id}, {"_id": 0}).sort("timestamp", -1).limit(500).to_list(500)
+    
+    login_logs = [l for l in logs if l.get("action") == "login"]
+    daily_logins = {}
+    for l in login_logs:
+        day = l["timestamp"].strftime("%Y-%m-%d")
+        daily_logins[day] = daily_logins.get(day, 0) + 1
+    
+    cart_adds = len([l for l in logs if l.get("action") == "add_to_cart"])
+    cart_removes = len([l for l in logs if l.get("action") == "remove_from_cart"])
+    orders = await db.orders.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).limit(20).to_list(20)
+    
+    return {
+        "user": user, "total_logins": len(login_logs),
+        "daily_logins": daily_logins, "total_orders": len(orders),
+        "total_spent": sum(o.get("total", 0) for o in orders),
+        "cart_adds": cart_adds, "cart_removes": cart_removes,
+        "recent_activity": logs[:20]
+    }
 
 @api_router.get("/admin/voice-orders")
 async def get_voice_orders(current_user: dict = Depends(get_current_user)):
@@ -626,8 +677,18 @@ async def delete_product(product_id: str, current_user: dict = Depends(get_curre
     
     return {"message": "Product deleted"}
 
+class ActivityLogCreate(BaseModel):
+    action: str
+    details: Optional[Dict[str, Any]] = None
+
+@api_router.post("/activity-log")
+async def create_activity_log(data: ActivityLogCreate, current_user: dict = Depends(get_current_user)):
+    await log_activity(current_user["id"], current_user["name"], data.action, data.details)
+    return {"message": "Logged"}
+
 @api_router.get("/categories")
 async def get_categories():
+
     return [
         {"id": "cakes_pastry", "name": "Cakes, Donuts & Pastry", "name_es": "Pasteles, Donas y Repostería", "name_hi": "केक, डोनट और पेस्ट्री", "name_ne": "केक, डोनट र पेस्ट्री", "name_ur": "کیک، ڈونٹس اور پیسٹری", "name_zh": "蛋糕、甜甜圈和糕点"},
         {"id": "nuts_seeds", "name": "Nuts, Seeds & Trail Mix", "name_es": "Nueces, Semillas y Mezcla", "name_hi": "नट्स, बीज और ट्रेल मिक्स", "name_ne": "नट्स, बीउ र ट्रेल मिक्स", "name_ur": "گری دار میوے، بیج اور ٹریل مکس", "name_zh": "坚果、种子和混合零食"},
