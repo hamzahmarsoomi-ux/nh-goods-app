@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -18,9 +20,9 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[os.environ.get('DB_NAME', 'nh_goods_db')]
 
 # JWT Settings
 JWT_SECRET = os.environ.get('JWT_SECRET', 'nh_goods_super_secret_key_2025')
@@ -1215,3 +1217,33 @@ app.add_middleware(
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+# Serve static web files (for Railway deployment)
+WEB_DIST = ROOT_DIR / "web_dist"
+if WEB_DIST.exists():
+    @app.get("/{full_path:path}")
+    async def serve_web(full_path: str):
+        # Try exact file
+        file_path = WEB_DIST / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        # Try .html extension
+        html_path = WEB_DIST / f"{full_path}.html"
+        if html_path.is_file():
+            return FileResponse(html_path)
+        # Try index.html in directory
+        index_path = WEB_DIST / full_path / "index.html"
+        if index_path.is_file():
+            return FileResponse(index_path)
+        # Fallback to root index.html
+        root_index = WEB_DIST / "index.html"
+        if root_index.is_file():
+            return FileResponse(root_index)
+        raise HTTPException(status_code=404)
+
+    # Mount static assets
+    if (WEB_DIST / "_expo").exists():
+        app.mount("/_expo", StaticFiles(directory=str(WEB_DIST / "_expo")), name="expo_static")
+    if (WEB_DIST / "assets").exists():
+        app.mount("/assets", StaticFiles(directory=str(WEB_DIST / "assets")), name="web_assets")
