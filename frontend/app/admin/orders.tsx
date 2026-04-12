@@ -48,10 +48,19 @@ export default function AdminOrdersScreen() {
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
       await updateOrderStatus(orderId, newStatus);
+      if (newStatus === 'confirmed') {
+        Alert.alert('Confirmed!', 'Order confirmed. Invoice sent to customer.');
+      } else if (newStatus === 'cancelled') {
+        Alert.alert('Rejected', 'Order cancelled. Customer will be notified.');
+      }
       loadOrders();
     } catch (error) {
       Alert.alert('Error', 'Failed to update order status');
     }
+  };
+
+  const handleContactCustomer = (order: any) => {
+    router.push(`/chat?userId=${order.user_id}&userName=${encodeURIComponent(order.user_name)}`);
   };
   
   const getStatusColor = (status: string) => {
@@ -113,23 +122,78 @@ export default function AdminOrdersScreen() {
           </Text>
         </View>
         
-        {next && item.status !== 'cancelled' && (
+        {item.status === 'pending' && (
+          <View style={styles.actionRow}>
+            <Pressable
+              style={styles.confirmButton}
+              onPress={() => {
+                Alert.alert('Confirm Order', `Confirm and send invoice to ${item.user_name}?`, [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Confirm & Send Invoice', onPress: () => handleStatusChange(item.id, 'confirmed') }
+                ]);
+              }}
+            >
+              <Ionicons name="checkmark-circle" size={18} color={COLORS.white} />
+              <Text style={styles.confirmButtonText}>Confirm & Invoice</Text>
+            </Pressable>
+            <Pressable
+              style={styles.chatButton}
+              onPress={() => handleContactCustomer(item)}
+            >
+              <Ionicons name="chatbubble" size={18} color={COLORS.royalGold} />
+            </Pressable>
+            <Pressable
+              style={styles.cancelButton}
+              onPress={() => {
+                Alert.alert('Reject Order', `Reject order from ${item.user_name}?`, [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Reject', style: 'destructive', onPress: () => handleStatusChange(item.id, 'cancelled') }
+                ]);
+              }}
+            >
+              <Ionicons name="close-circle" size={18} color={COLORS.error} />
+            </Pressable>
+          </View>
+        )}
+        
+        {item.status === 'confirmed' && (
           <View style={styles.actionRow}>
             <Pressable
               style={styles.updateButton}
-              onPress={() => handleStatusChange(item.id, next)}
+              onPress={() => handleStatusChange(item.id, 'delivering')}
             >
-              <Ionicons name="checkmark-circle" size={18} color={COLORS.deepNavy} />
-              <Text style={styles.updateButtonText}>Mark as {next}</Text>
+              <Ionicons name="car" size={18} color={COLORS.deepNavy} />
+              <Text style={styles.updateButtonText}>Start Delivery</Text>
             </Pressable>
-            {item.status === 'pending' && (
-              <Pressable
-                style={styles.cancelButton}
-                onPress={() => handleStatusChange(item.id, 'cancelled')}
-              >
-                <Ionicons name="close-circle" size={18} color={COLORS.error} />
-              </Pressable>
-            )}
+            <Pressable style={styles.chatButton} onPress={() => handleContactCustomer(item)}>
+              <Ionicons name="chatbubble" size={18} color={COLORS.royalGold} />
+            </Pressable>
+          </View>
+        )}
+        
+        {item.status === 'delivering' && (
+          <View style={styles.actionRow}>
+            <Pressable
+              style={styles.updateButton}
+              onPress={() => handleStatusChange(item.id, 'delivered')}
+            >
+              <Ionicons name="checkmark-done-circle" size={18} color={COLORS.deepNavy} />
+              <Text style={styles.updateButtonText}>Mark Delivered</Text>
+            </Pressable>
+            <Pressable style={styles.chatButton} onPress={() => handleContactCustomer(item)}>
+              <Ionicons name="chatbubble" size={18} color={COLORS.royalGold} />
+            </Pressable>
+          </View>
+        )}
+        
+        {item.status === 'cancelled' && (
+          <View style={styles.rejectedRow}>
+            <Ionicons name="close-circle" size={16} color={COLORS.error} />
+            <Text style={styles.rejectedText}>Order Rejected</Text>
+            <Pressable style={styles.chatButtonSmall} onPress={() => handleContactCustomer(item)}>
+              <Ionicons name="chatbubble-outline" size={14} color={COLORS.royalGold} />
+              <Text style={styles.chatSmallText}>Chat</Text>
+            </Pressable>
           </View>
         )}
       </View>
@@ -316,6 +380,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'capitalize'
   },
+  confirmButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.success,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    gap: SPACING.xs
+  },
+  confirmButtonText: {
+    color: COLORS.white,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: 'bold'
+  },
+  chatButton: {
+    width: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.royalGold + '20',
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.royalGold
+  },
   cancelButton: {
     width: 48,
     alignItems: 'center',
@@ -324,6 +412,35 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
     borderColor: COLORS.error
+  },
+  rejectedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border
+  },
+  rejectedText: {
+    flex: 1,
+    color: COLORS.error,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: '600'
+  },
+  chatButtonSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.royalGold + '20',
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.sm
+  },
+  chatSmallText: {
+    color: COLORS.royalGold,
+    fontSize: FONTS.sizes.xs,
+    fontWeight: '600'
   },
   emptyContainer: {
     flex: 1,
