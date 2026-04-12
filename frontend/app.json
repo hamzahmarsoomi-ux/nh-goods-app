@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "NH GOODS",
-    "slug": "nh-goods",
+    "slug": "nh-goods-gmpcx6rrjjbutyfvfgfa",
     "owner": "hm97za",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -57,8 +57,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "7387af64-b66c-4e08-a6e4-40db83e6cdb1"
-      }
+        "projectId": "74aee623-f1b8-4618-9738-289b2f96cd15"
+      },
+      "router": {}
     },
     "runtimeVersion": {
       "policy": "appVersion"
