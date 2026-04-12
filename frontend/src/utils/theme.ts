@@ -1,38 +1,43 @@
-// NH GOODS Theme - Navy Blue and Royal Gold
+// NH GOODS Theme - Premium Warm Commerce Colors
+// Psychology: Warm tones drive purchases, trust & urgency
 export const COLORS = {
   // Primary Colors
-  navyBlue: '#0A1628',
-  deepNavy: '#05101F',
-  royalGold: '#D4AF37',
-  lightGold: '#F4E4BC',
+  navyBlue: '#1A1A2E',
+  deepNavy: '#16213E',
+  royalGold: '#E8A838',
+  lightGold: '#FFF3D4',
   
-  // Background Colors
-  background: '#05101F',
-  cardBackground: '#0D1F35',
-  inputBackground: '#122A45',
+  // Background Colors - Warm dark tones
+  background: '#16213E',
+  cardBackground: '#1F2B47',
+  inputBackground: '#253554',
   
   // Text Colors
   textPrimary: '#FFFFFF',
-  textSecondary: '#A0B4C8',
-  textMuted: '#6B7F94',
+  textSecondary: '#C8D6E5',
+  textMuted: '#8395A7',
   
-  // Status Colors
-  success: '#22C55E',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+  // Status Colors - Vibrant & action-oriented
+  success: '#2ED573',
+  warning: '#FFA502',
+  error: '#FF4757',
+  info: '#45AAF2',
   
   // Additional
-  border: '#1E3A5F',
-  divider: '#1E3A5F',
+  border: '#2C3E6B',
+  divider: '#2C3E6B',
   white: '#FFFFFF',
   black: '#000000',
   
-  // Category Colors
-  bakery: '#E67E22',
-  cakesSweets: '#E91E63',
-  premiumSnacks: '#9C27B0',
-  energyBeverages: '#00BCD4'
+  // Action Colors - Drive purchases
+  accent: '#FF6348',       // Urgency/CTA
+  highlight: '#FFEAA7',    // Attention
+  
+  // Category Colors - Appetizing
+  bakery: '#F39C12',
+  cakesSweets: '#E84393',
+  premiumSnacks: '#6C5CE7',
+  energyBeverages: '#00CEC9'
 };
 
 export const FONTS = {
