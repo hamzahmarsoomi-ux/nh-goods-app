@@ -18,6 +18,7 @@ export default function AdminLayout() {
       <Stack.Screen name="orders" />
       <Stack.Screen name="deals" />
       <Stack.Screen name="activity" />
+      <Stack.Screen name="invoice-builder" />
     </Stack>
   );
 }

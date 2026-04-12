@@ -75,6 +75,14 @@ export default function AdminDashboard() {
       icon: 'camera',
       color: COLORS.royalGold,
       route: '/photo-tool'
+    },
+    {
+      id: 'invoice',
+      title: 'Invoice Builder',
+      subtitle: 'Create & send PDF invoices',
+      icon: 'document-text',
+      color: COLORS.success,
+      route: '/admin/invoice-builder'
     }
   ];
   
