@@ -59,7 +59,7 @@ export default function SplashScreen() {
         {/* Badges */}
         <View style={styles.badgesContainer}>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>FREE DELIVERY</Text>
+            <Text style={styles.badgeText}>3% DELIVERY FEE</Text>
           </View>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>NO MINIMUM ORDER</Text>

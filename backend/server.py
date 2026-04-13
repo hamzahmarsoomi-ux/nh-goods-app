@@ -754,7 +754,9 @@ async def get_categories():
 
 @api_router.post("/orders")
 async def create_order(data: OrderCreate, current_user: dict = Depends(get_current_user)):
-    total = sum(item.price * item.quantity for item in data.items)
+    subtotal = sum(item.price * item.quantity for item in data.items)
+    delivery_fee = round(subtotal * 0.03, 2)  # 3% delivery fee
+    total = round(subtotal + delivery_fee, 2)
     
     order = Order(
         user_id=current_user["id"],
@@ -769,6 +771,8 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
     )
     
     order_dict = order.dict()
+    order_dict["subtotal"] = subtotal
+    order_dict["delivery_fee"] = delivery_fee
     await db.orders.insert_one(order_dict)
     
     # Log activity

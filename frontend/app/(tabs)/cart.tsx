@@ -202,13 +202,13 @@ export default function CartScreen() {
               <Text style={s.summaryValue}>${total.toFixed(2)}</Text>
             </View>
             <View style={s.summaryRow}>
-              <Text style={s.summaryLabel}>Delivery</Text>
-              <Text style={[s.summaryValue, s.freeText]}>FREE</Text>
+              <Text style={s.summaryLabel}>Delivery (3%)</Text>
+              <Text style={s.summaryValue}>${(total * 0.03).toFixed(2)}</Text>
             </View>
             <View style={s.divider} />
             <View style={s.summaryRow}>
               <Text style={s.totalLabel}>Grand Total</Text>
-              <Text style={s.totalValue}>${total.toFixed(2)}</Text>
+              <Text style={s.totalValue}>${(total + total * 0.03).toFixed(2)}</Text>
             </View>
 
             <Pressable
