@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: nh-goods
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: MONGO_URL
+        value: mongodb+srv://nhgoods_user:NHGoods2026Secure@cluster0.fzdqwxz.mongodb.net/?appName=Cluster0
+      - key: DB_NAME
+        value: nh_goods_db
+      - key: JWT_SECRET
+        value: nh_goods_production_secret_2026_railway
