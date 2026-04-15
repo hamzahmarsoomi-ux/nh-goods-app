@@ -20,11 +20,16 @@ export default function SplashScreen() {
     try {
       // Seed database with initial data
       await seedDatabase();
+      console.log('Database seeded successfully');
     } catch (error) {
       console.log('Seed error (might already be seeded):', error);
     }
     
-    await loadStoredAuth();
+    try {
+      await loadStoredAuth();
+    } catch (error) {
+      console.log('Auth load error:', error);
+    }
     setIsLoading(false);
   };
   

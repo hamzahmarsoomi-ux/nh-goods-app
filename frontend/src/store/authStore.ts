@@ -43,10 +43,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (phone: string, pin: string) => {
     set({ isLoading: true, error: null });
     try {
+      // Auto-seed before login attempt
+      try {
+        await axios.post(`${API_URL}/api/seed`);
+      } catch (e) {}
+      
       const response = await axios.post(`${API_URL}/api/auth/login`, {
         phone_number: phone,
         pin: pin
-      });
+      }, { timeout: 15000 });
       
       const { token, user } = response.data;
       
@@ -62,7 +67,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       return true;
     } catch (error: any) {
-      const message = error.response?.data?.detail || 'Login failed';
+      console.log('Login error:', error?.message, error?.response?.data);
+      let message = 'Login failed. Check phone number and PIN.';
+      if (error.response?.data?.detail) {
+        message = error.response.data.detail;
+      } else if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        message = 'Connection timeout. Please check your internet.';
+      } else if (!error.response) {
+        message = 'Cannot connect to server. Please check your internet connection.';
+      }
       set({ error: message, isLoading: false });
       return false;
     }
