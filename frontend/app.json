@@ -54,7 +54,7 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "baseUrl": ""
+      "baseUrl": "/nh-goods-app"
     },
     "extra": {
       "eas": {
