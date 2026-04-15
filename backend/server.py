@@ -755,8 +755,17 @@ async def get_categories():
 
     return [
         {"id": "cakes_pastry", "name": "Cakes, Donuts & Pastry", "name_es": "Pasteles, Donas y Repostería", "name_hi": "केक, डोनट और पेस्ट्री", "name_ne": "केक, डोनट र पेस्ट्री", "name_ur": "کیک، ڈونٹس اور پیسٹری", "name_zh": "蛋糕、甜甜圈和糕点"},
+        {"id": "chocolate_candy", "name": "Chocolate & Candy", "name_es": "Chocolate y Dulces", "name_hi": "चॉकलेट और कैंडी", "name_ne": "चकलेट र क्यान्डी", "name_ur": "چاکلیٹ اور کینڈی", "name_zh": "巧克力和糖果"},
+        {"id": "snacks", "name": "Snacks", "name_es": "Botanas", "name_hi": "स्नैक्स", "name_ne": "स्न्याक्स", "name_ur": "سنیکس", "name_zh": "零食"},
+        {"id": "candy", "name": "Candy", "name_es": "Dulces", "name_hi": "कैंडी", "name_ne": "क्यान्डी", "name_ur": "کینڈی", "name_zh": "糖果"},
         {"id": "nuts_seeds", "name": "Nuts, Seeds & Trail Mix", "name_es": "Nueces, Semillas y Mezcla", "name_hi": "नट्स, बीज और ट्रेल मिक्स", "name_ne": "नट्स, बीउ र ट्रेल मिक्स", "name_ur": "گری دار میوے، بیج اور ٹریل مکس", "name_zh": "坚果、种子和混合零食"},
-        {"id": "energy_drinks", "name": "Energy Drinks", "name_es": "Bebidas Energéticas", "name_hi": "एनर्जी ड्रिंक्स", "name_ne": "ऊर्जा पेय", "name_ur": "انرجی ڈرنکس", "name_zh": "能量饮料"}
+        {"id": "energy_drinks", "name": "Energy Drinks", "name_es": "Bebidas Energéticas", "name_hi": "एनर्जी ड्रिंक्स", "name_ne": "ऊर्जा पेय", "name_ur": "انرجی ڈرنکس", "name_zh": "能量饮料"},
+        {"id": "beverages", "name": "Beverages", "name_es": "Bebidas", "name_hi": "पेय पदार्थ", "name_ne": "पेय", "name_ur": "مشروبات", "name_zh": "饮料"},
+        {"id": "dairy", "name": "Dairy", "name_es": "Lácteos", "name_hi": "डेयरी", "name_ne": "डेरी", "name_ur": "ڈیری", "name_zh": "乳制品"},
+        {"id": "grocery", "name": "Grocery", "name_es": "Abarrotes", "name_hi": "किराना", "name_ne": "किराना", "name_ur": "گروسری", "name_zh": "杂货"},
+        {"id": "frozen", "name": "Frozen", "name_es": "Congelados", "name_hi": "फ्रोजन", "name_ne": "फ्रोजन", "name_ur": "منجمد", "name_zh": "冷冻食品"},
+        {"id": "household", "name": "Household", "name_es": "Hogar", "name_hi": "घरेलू", "name_ne": "घरायसी", "name_ur": "گھریلو", "name_zh": "家居用品"},
+        {"id": "personal_care", "name": "Personal Care", "name_es": "Cuidado Personal", "name_hi": "पर्सनल केयर", "name_ne": "व्यक्तिगत हेरचाह", "name_ur": "ذاتی نگہداشت", "name_zh": "个人护理"}
     ]
 
 # ==================== ORDER ROUTES ====================

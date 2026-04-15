@@ -85,21 +85,39 @@ export default function HomeScreen() {
   };
 
   const getCategoryIcon = (id: string) => {
-    switch (id) {
-      case 'cakes_pastry': return 'ice-cream-outline';
-      case 'nuts_seeds': return 'nutrition-outline';
-      case 'energy_drinks': return 'flash-outline';
-      default: return 'cube-outline';
-    }
+    const iconMap: Record<string, string> = {
+      'cakes_pastry': 'ice-cream-outline',
+      'nuts_seeds': 'nutrition-outline',
+      'energy_drinks': 'flash-outline',
+      'chocolate_candy': 'heart-outline',
+      'snacks': 'fast-food-outline',
+      'candy': 'gift-outline',
+      'beverages': 'beer-outline',
+      'dairy': 'water-outline',
+      'grocery': 'basket-outline',
+      'frozen': 'snow-outline',
+      'household': 'home-outline',
+      'personal_care': 'body-outline',
+    };
+    return iconMap[id] || 'cube-outline';
   };
 
   const getCategoryColor = (id: string) => {
-    switch (id) {
-      case 'cakes_pastry': return COLORS.cakesSweets;
-      case 'nuts_seeds': return COLORS.premiumSnacks;
-      case 'energy_drinks': return COLORS.energyBeverages;
-      default: return COLORS.royalGold;
-    }
+    const colorMap: Record<string, string> = {
+      'cakes_pastry': '#FF6B6B',
+      'nuts_seeds': '#4ECDC4',
+      'energy_drinks': '#45B7D1',
+      'chocolate_candy': '#96523C',
+      'snacks': '#FFD93D',
+      'candy': '#FF69B4',
+      'beverages': '#6BCB77',
+      'dairy': '#4D96FF',
+      'grocery': '#FF9F43',
+      'frozen': '#54A0FF',
+      'household': '#A29BFE',
+      'personal_care': '#FDA7DF',
+    };
+    return colorMap[id] || COLORS.royalGold;
   };
 
   if (loading) {
