@@ -8,7 +8,8 @@ import {
   ActivityIndicator,
   TextInput,
   RefreshControl,
-  Image
+  Image,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
@@ -68,13 +69,29 @@ export default function CatalogScreen() {
     loadProducts();
   };
   
+  const [qtyModalVisible, setQtyModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [quantity, setQuantity] = useState(1);
+
   const handleAddToCart = (product: any) => {
-    addItem({
-      product_id: product.id,
-      name: getLocalizedName(product),
-      price: product.wholesale_price || product.price,
-      image_base64: product.image_base64
-    });
+    setSelectedProduct(product);
+    setQuantity(1);
+    setQtyModalVisible(true);
+  };
+
+  const confirmAddToCart = () => {
+    if (selectedProduct) {
+      for (let i = 0; i < quantity; i++) {
+        addItem({
+          product_id: selectedProduct.id,
+          name: getLocalizedName(selectedProduct),
+          price: selectedProduct.wholesale_price || selectedProduct.price,
+          image_base64: selectedProduct.image_base64
+        });
+      }
+    }
+    setQtyModalVisible(false);
+    setSelectedProduct(null);
   };
   
   const getLocalizedName = (product: any) => {
@@ -240,6 +257,55 @@ export default function CatalogScreen() {
           }
         />
       )}
+
+      {/* Quantity Modal */}
+      <Modal
+        visible={qtyModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setQtyModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setQtyModalVisible(false)}>
+          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
+            <Text style={styles.modalTitle}>
+              {selectedProduct ? getLocalizedName(selectedProduct) : ''}
+            </Text>
+            {selectedProduct && canSeePrices && (
+              <Text style={styles.modalPrice}>
+                ${(selectedProduct.wholesale_price || selectedProduct.price).toFixed(2)} × {quantity} = ${((selectedProduct.wholesale_price || selectedProduct.price) * quantity).toFixed(2)}
+              </Text>
+            )}
+            <Text style={styles.modalLabel}>Quantity</Text>
+            <View style={styles.qtyRow}>
+              <Pressable 
+                style={styles.qtyButton} 
+                onPress={() => setQuantity(Math.max(1, quantity - 1))}
+              >
+                <Ionicons name="remove" size={24} color={COLORS.white} />
+              </Pressable>
+              <TextInput
+                style={styles.qtyInput}
+                value={String(quantity)}
+                onChangeText={(t) => { const n = parseInt(t); if (n > 0) setQuantity(n); }}
+                keyboardType="number-pad"
+              />
+              <Pressable 
+                style={styles.qtyButton} 
+                onPress={() => setQuantity(quantity + 1)}
+              >
+                <Ionicons name="add" size={24} color={COLORS.white} />
+              </Pressable>
+            </View>
+            <Pressable style={styles.confirmButton} onPress={confirmAddToCart}>
+              <Ionicons name="cart" size={20} color={COLORS.deepNavy} />
+              <Text style={styles.confirmButtonText}>Add {quantity} to Cart</Text>
+            </Pressable>
+            <Pressable style={styles.cancelButton} onPress={() => setQtyModalVisible(false)}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -446,5 +512,86 @@ const styles = StyleSheet.create({
   viewOnlyText: {
     color: COLORS.textMuted,
     fontSize: FONTS.sizes.xs
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalContent: {
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.xl,
+    width: '85%',
+    alignItems: 'center'
+  },
+  modalTitle: {
+    color: COLORS.white,
+    fontSize: FONTS.sizes.lg,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: SPACING.sm
+  },
+  modalPrice: {
+    color: COLORS.royalGold,
+    fontSize: FONTS.sizes.md,
+    fontWeight: '600',
+    marginBottom: SPACING.md
+  },
+  modalLabel: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.sm,
+    marginBottom: SPACING.sm
+  },
+  qtyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+    gap: SPACING.md
+  },
+  qtyButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.royalGold,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  qtyInput: {
+    width: 80,
+    height: 48,
+    backgroundColor: COLORS.inputBackground,
+    borderRadius: BORDER_RADIUS.sm,
+    color: COLORS.white,
+    fontSize: FONTS.sizes.xl,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  confirmButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.royalGold,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: BORDER_RADIUS.md,
+    width: '100%',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm
+  },
+  confirmButtonText: {
+    color: COLORS.deepNavy,
+    fontSize: FONTS.sizes.md,
+    fontWeight: 'bold'
+  },
+  cancelButton: {
+    paddingVertical: SPACING.sm,
+    width: '100%',
+    alignItems: 'center'
+  },
+  cancelButtonText: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.md
   }
 });
