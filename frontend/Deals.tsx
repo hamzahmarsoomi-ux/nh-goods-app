@@ -6,7 +6,7 @@ const DealsPage = () => {
 
   useEffect(() => {
     // This fetches from your Railway backend
-    fetch('https://your-backend-url.railway.app/api/deals')
+    fetch('https://sweet-balance-production-89a6.up.railway.app/api/deals')
       .then(res => res.json())
       .then(data => setItems(data))
       .catch(err => console.log("Error fetching deals:", err));
