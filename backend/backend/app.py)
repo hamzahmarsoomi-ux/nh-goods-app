@@ -1,0 +1,37 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/api/deals")
+async def get_deals():
+    # Items from McLane Today's Deals
+    items = [
+        {"name": "SkinnyPop 1oz Original (12ct)", "cost": 14.49},
+        {"name": "REESE'S Filled Pretzels (12ct)", "cost": 22.64},
+        {"name": "Blue Raspberry Sour Strip Candy", "cost": 26.08},
+        {"name": "Dot's Pretzels Honey Mustard", "cost": 28.55},
+        {"name": "REESE'S Peanut Butter Cups (36ct)", "cost": 45.41},
+        {"name": "KIT KAT Wafer Bar (36ct)", "cost": 45.41}
+    ]
+    
+    output = []
+    for item in items:
+        # Hamzah's Logic: 15% markup, max $2.50
+        markup = item['cost'] * 0.15
+        final_markup = markup if markup <= 2.50 else 2.50
+        
+        output.append({
+            "product_name": item['name'],
+            "price": round(item['cost'] + final_markup, 2),
+            "original_cost": item['cost'],
+            "tag": "TODAY'S DEAL"
+        })
+    return output
