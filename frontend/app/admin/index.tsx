@@ -83,6 +83,14 @@ export default function AdminDashboard() {
       icon: 'document-text',
       color: COLORS.success,
       route: '/admin/invoice-builder'
+    },
+    {
+      id: 'scrape',
+      title: 'Add from URL',
+      subtitle: 'Paste product link — auto-fetch name, image & price',
+      icon: 'link',
+      color: '#7C3AED',
+      route: '/admin/scrape-product'
     }
   ];
   

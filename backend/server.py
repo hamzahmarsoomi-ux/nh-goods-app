@@ -1155,6 +1155,111 @@ async def get_conversations(current_user: dict = Depends(get_current_user)):
     
     return list(conversations.values())
 
+# ==================== PRODUCT SCRAPER ====================
+
+@api_router.post("/admin/scrape-product")
+async def scrape_product_url(data: dict, current_user: dict = Depends(get_current_user)):
+    """Scrape product info (name, image, price) from a URL"""
+    if not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    url = data.get("url", "").strip()
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is required")
+    
+    import httpx
+    from bs4 import BeautifulSoup
+    import re
+    import json as json_lib
+    
+    req_headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            resp = await client.get(url, headers=req_headers)
+            html = resp.text
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch URL: {str(e)}")
+    
+    soup = BeautifulSoup(html, "html.parser")
+    
+    # --- Extract product name ---
+    name = ""
+    og_title = soup.find("meta", property="og:title")
+    if og_title:
+        name = og_title.get("content", "").strip()
+    if not name:
+        el = soup.find(id="productTitle")
+        if el:
+            name = el.get_text(strip=True)
+    if not name and soup.title:
+        name = soup.title.get_text(strip=True).split("|")[0].split("-")[0].strip()
+    
+    # --- Extract product image ---
+    image_url = ""
+    og_img = soup.find("meta", property="og:image")
+    if og_img:
+        image_url = og_img.get("content", "").strip()
+    if not image_url:
+        el = soup.find(id="landingImage") or soup.find(id="imgBlkFront")
+        if el:
+            image_url = el.get("src") or el.get("data-old-hires") or el.get("data-a-dynamic-image", "")
+            if isinstance(image_url, str) and image_url.startswith("{"):
+                try:
+                    imgs = json_lib.loads(image_url)
+                    image_url = list(imgs.keys())[0] if imgs else ""
+                except:
+                    image_url = ""
+    if not image_url:
+        for img in soup.find_all("img"):
+            src = img.get("src", "")
+            if src and src.startswith("http") and any(x in src for x in [".jpg", ".jpeg", ".png", ".webp"]):
+                image_url = src
+                break
+    
+    # --- Extract price ---
+    price = 0.0
+    og_price = soup.find("meta", property="product:price:amount") or soup.find("meta", {"itemprop": "price"})
+    if og_price:
+        try:
+            price = float(re.sub(r"[^\d.]", "", og_price.get("content", "0")))
+        except:
+            pass
+    if not price:
+        for sel in ["#priceblock_ourprice", "#priceblock_dealprice", ".a-price .a-offscreen", "#price_inside_buybox"]:
+            el = soup.select_one(sel)
+            if el:
+                try:
+                    price = float(re.sub(r"[^\d.]", "", el.get_text()))
+                    break
+                except:
+                    pass
+    if not price:
+        price_match = re.search(r"\$([\d,]+\.\d{2})", html)
+        if price_match:
+            try:
+                price = float(price_match.group(1).replace(",", ""))
+            except:
+                pass
+    
+    # --- Extract description ---
+    description = ""
+    og_desc = soup.find("meta", property="og:description") or soup.find("meta", {"name": "description"})
+    if og_desc:
+        description = og_desc.get("content", "").strip()[:300]
+    
+    return {
+        "name": name[:200] if name else "",
+        "image_url": image_url,
+        "price": price,
+        "description": description,
+        "source_url": url,
+    }
+
 # ==================== SEED DATA ====================
 
 @api_router.post("/seed")

@@ -54,7 +54,8 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "baseUrl": "/nh-goods-app"
+      "baseUrl": "/nh-goods-app",
+      "requireContext": true
     },
     "extra": {
       "eas": {
@@ -62,6 +63,8 @@
       },
       "router": {}
     },
-    "runtimeVersion": "1.0.0"
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    }
   }
 }

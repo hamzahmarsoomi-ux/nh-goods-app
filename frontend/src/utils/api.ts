@@ -114,3 +114,7 @@ export const createListing = (data: { product_name: string; description?: string
 export const getListings = () => api.get('/marketplace');
 export const getMyListings = () => api.get('/marketplace/mine');
 export const deleteListing = (id: string) => api.delete(`/marketplace/${id}`);
+
+// Product Scraper
+export const scrapeProduct = (url: string) =>
+  api.post('/admin/scrape-product', { url });
